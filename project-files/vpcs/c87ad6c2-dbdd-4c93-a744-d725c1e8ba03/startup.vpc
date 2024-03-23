@@ -1,0 +1,2 @@
+set pcname Cliente1
+ip 10.5.2.1 10.5.2.62 26
