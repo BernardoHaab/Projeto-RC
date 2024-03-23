@@ -2,11 +2,11 @@
 project-files/dynamips/**/*_lock
 project-files/dynamips/**/*_log.txt
 project-files/dynamips/**/*_stdout.txt
-project-files/dynamips/**/*.log
 project-files/dynamips/ilt_*_mips64e
 project-files/dynamips/ilt_*_mips64j
 project-files/dynamips/ilt_*_ppc32e
 project-files/dynamips/ilt_*_ppc32j
+project-files/**/*.log
 
 # Created by https://www.toptal.com/developers/gitignore/api/c
 # Edit at https://www.toptal.com/developers/gitignore?templates=c
