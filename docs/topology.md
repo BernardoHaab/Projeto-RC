@@ -1,7 +1,7 @@
 # Topology
 
 ![Topology before calculating networks and
-ips](/project-files/images/topology-undefined.png)
+ips](/assets/topology-undefined.png)
 
 At the IPv4 addressing level, the following requirements must be taken into
 account when configuring the communications scenario:
@@ -244,4 +244,4 @@ Network D:
 In addition to communication, router R3 must support SNAT (Source NAT), where
 the network of Client1 and Client2 is the internal network.
 
-![Topology](/project-files/images/topology.png)
+![Topology](/assets/topology.png)
