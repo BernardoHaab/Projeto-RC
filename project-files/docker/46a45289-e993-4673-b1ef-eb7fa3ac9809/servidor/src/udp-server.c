@@ -17,10 +17,15 @@
 #define BUFFER_SIZE 512 // Tamanho do buffer
 
 #define DELIMITER " "
+#define USERS_FILE "./include/users.txt"
 
-void processUdp()
+char usersFile[100];
+
+void processUdp(int portConfig, char *fileName)
 {
   printf("UPD\n");
+
+  strcpy(usersFile, fileName);
 
   struct sockaddr_in si_minha, si_outra;
   int socketFd, receivedBytes;
@@ -35,9 +40,10 @@ void processUdp()
     error("Erro na criação do socket");
   }
 
+  printf("portConfig: %d\n", portConfig);
   // Preenchimento da socket address structure
   si_minha.sin_family = AF_INET;
-  si_minha.sin_port = htons(SERVER_PORT_DEFAULT);
+  si_minha.sin_port = htons(portConfig);
   si_minha.sin_addr.s_addr = inet_addr(SERVER_IP_DEFAULT);
 
   printf("Vai associar porta\n");
@@ -68,18 +74,35 @@ void processUdp()
     // Para ignorar o restante conteúdo (anterior do buffer)
     receivedBuffer[receivedBytes] = '\0';
 
-    printf("Recebeu mensage: %s", receivedBuffer);
+    printf("Recebeu mensage: %s\n", receivedBuffer);
+
+    // addUser(receivedBuffer, responseBuffer);
+    // deleteUser(receivedBuffer, responseBuffer);
+    // listUsers(receivedBuffer, responseBuffer);
+    // quitServer(receivedBuffer, responseBuffer);
+
+    // printf("RESPOSTA: %s\n", responseBuffer);
+
+    char *commandString = strtok(receivedBuffer, DELIMITER);
+    printf("commandString: %s\n", commandString);
 
     Command command = processCommand(
         receivedBuffer,
         BUFFER_SIZE,
         responseBuffer);
 
-    printf("Processou comando");
+    if (command == QUIT)
+    {
+      quit = 1;
+    }
+
+    printf("Processou comando\n");
+    printf("Resposta: %s\n", responseBuffer);
 
   } while (quit != 1);
 
   // Fecha socket e termina programa
+  // ToDo: Corrigir o close do socket
   close(socketFd);
 }
 
@@ -94,7 +117,10 @@ Command processCommand(
 
   char *bufferCloneFree = trim(bufferClone);
 
-  char *commandString = strtok(bufferClone, DELIMITER);
+  char *commandString = strtok(bufferClone, "");
+  char *argumentString = strtok(NULL, "");
+
+  printf("argumentString: %s\n", argumentString);
 
   bool commandFound = false;
   Command command = HELP;
@@ -103,7 +129,7 @@ Command processCommand(
   {                                                    \
     commandFound = true;                               \
     command = enum;                                    \
-    function(bufferClone, response);                   \
+    function(argumentString, response);                \
   }
   COMMAND_ENUM
 #undef WRAPPER
@@ -120,7 +146,123 @@ Command processCommand(
 
 void addUser(const char *const argument, char *response)
 {
-  printf("ADD_USER");
+  FILE *users;
+  char *argumentClone = malloc(100);
+  strncpy(argumentClone, argument, 100);
+  char *argumentCloneFree = trim(argumentClone);
+
+  char *login = strtok(argumentCloneFree, DELIMITER);
+  char *password = strtok(NULL, DELIMITER);
+  char *role = strtok(NULL, DELIMITER);
+
+  char newUser[102];
+  sprintf(newUser, "%s;%s;%s\n", login, password, role);
+
+  users = fopen(usersFile, "a");
+  fwrite(newUser, strlen(newUser), 1, users);
+
+  strcpy(response, "Usuário adicionado com sucesso!\n");
+
+  free(argumentCloneFree);
+  fclose(users);
+}
+
+void deleteUser(const char *const argument, char *response)
+{
+  FILE *originalFile, *tempFile;
+  // char buffer[256];
+  // int currentLine = 1;
+  char *argumentClone = malloc(100);
+  strncpy(argumentClone, argument, 100);
+  char *argumentFree = trim(argumentClone);
+
+  // Open source file in read mode
+  originalFile = fopen(usersFile, "r");
+  if (originalFile == NULL)
+  {
+    printf("Erro ao abrir arquivo de usuários\n");
+    strcpy(response, "Usuário não encontrado\n");
+    return;
+  }
+
+  // Create temporary file in write mode
+  tempFile = fopen("temp.txt", "w");
+  if (tempFile == NULL)
+  {
+    printf("Error creating temporary file.\n");
+    fclose(originalFile);
+    return;
+  }
+
+  char *line = NULL;
+  size_t length = 0;
+  bool found = false;
+
+  while (getline(&line, &length, originalFile) != -1)
+  {
+    char lineCopy[100];
+    strcpy(lineCopy, line);
+    char *user = strtok(lineCopy, ";");
+    printf("Usuário: %s\n", user);
+    printf("Argumento: %s\n", argumentFree);
+
+    if (found || strcmp(argumentFree, user) != 0)
+    {
+      fputs(line, tempFile);
+    }
+    else
+    {
+      found = true;
+    }
+  }
+
+  if (!found)
+  {
+    printf("Usuário não encontrado\n");
+    strcpy(response, "Usuário não encontrado\n");
+  }
+
+  fclose(originalFile);
+  fclose(tempFile);
+
+  // Remove the original file
+  remove(usersFile);
+
+  // Rename the temporary file to the original filename
+  rename("temp.txt", usersFile);
+}
+
+void listUsers(const char *const argument, char *response)
+{
+  FILE *users;
+  char buffer[256];
+  users = fopen(usersFile, "r");
+  char userList[BUFFER_SIZE];
+
+  if (users == NULL)
+  {
+    printf("Erro ao abrir arquivo de usuários\n");
+    strcpy(response, "\n");
+    return;
+  }
+
+  while (fgets(buffer, 256, users) != NULL)
+  {
+    char *user = strtok(buffer, ";");
+    strcat(userList, user);
+    strcat(userList, "\n");
+  }
+
+  strcpy(response, userList);
+
+  fclose(users);
+}
+
+void quitServer(const char *const argument, char *response)
+{
+  (void)argument;
+
+  strcpy(response, "Fechando servidor!\n");
 }
 
 void commandHelp(const char *const argument, char *response)
