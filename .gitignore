@@ -1,3 +1,7 @@
+.clangd
+tcp-client
+tcp-server
+
 # GNS 3 Ignore
 project-files/dynamips/**/*_lock
 project-files/dynamips/**/*_log.txt
