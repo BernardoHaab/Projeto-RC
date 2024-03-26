@@ -1,8 +1,0 @@
-{
-  "files.associations": {
-    "udp-servers.h": "c",
-    "tcp-server.h": "c",
-    "udp-command.h": "c",
-    "utils.h": "c"
-  }
-}

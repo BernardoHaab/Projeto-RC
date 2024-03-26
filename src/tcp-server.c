@@ -1,8 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-int main(void)
+#include "tcp-server.h"
+
+void processTcp()
 {
-	printf("Hello world from tcp-server.c\n");
-
-	return 0;
+  printf("TCP\n");
 }

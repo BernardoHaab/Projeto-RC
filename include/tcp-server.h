@@ -1,4 +1,6 @@
-#ifndef TCP_SERVER_H
-#define TCP_SERVER_H
+#ifndef TCP_SERVER
+#define TCP_SERVER
 
-#endif // !TCP_SERVER_H
+void processTcp();
+
+#endif // !TCP_SERVER
