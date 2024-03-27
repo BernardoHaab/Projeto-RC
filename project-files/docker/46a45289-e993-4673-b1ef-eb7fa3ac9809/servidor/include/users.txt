@@ -1,3 +1,3 @@
-usuario;senha;alun
+usuario;senha;administrador
 A;B;C
 T;e;S

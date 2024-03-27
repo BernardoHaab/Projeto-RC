@@ -16,6 +16,8 @@
 #define SERVER_PORT_DEFAULT 8080
 #define BUFFER_SIZE 512 // Tamanho do buffer
 
+#define LOGIN_SUCESS "Login realizado com sucesso!\n"
+
 #define DELIMITER " "
 #define USERS_FILE "./include/users.txt"
 
@@ -75,7 +77,7 @@ void processUdp(int portConfig, char *fileName)
     // Para ignorar o restante conteúdo (anterior do buffer)
     receivedBuffer[receivedBytes] = '\0';
 
-    printf("Recebeu mensage: %s. De: %d\n", receivedBuffer, si_outra.sin_addr.s_addr);
+    printf("Recebeu mensage: %s\n", receivedBuffer);
 
     if (strncmp(receivedBuffer, "X", 1) == 0)
     {
@@ -83,19 +85,40 @@ void processUdp(int portConfig, char *fileName)
       continue;
     }
 
+    // if (strncmp(receivedBuffer, "login", 5) == 0)
+    // {
+    //   char *commandString = strtok(receivedBuffer, " ");
+    //   printf("commandString: %s\n", commandString);
+    //   continue;
+    // }
+
     // ToDo: Se for comando de login realizar login
     // (busca no ficheiro e se existir adiciona endereço no array 'loggedAdmins')
     // Se não for login: verifica se esta logado procurando na lista 'loggedAdmins'
     //    - Se não estiver retonar 'Não autrizado'
     //    - Se estiver executa 'processCommand'
 
-    char *commandString = strtok(receivedBuffer, DELIMITER);
-    printf("commandString: %s\n", commandString);
+    // char *bufferClone = malloc(sizeof(receivedBuffer[0]) * BUFFER_SIZE);
+
+    // strncpy(bufferClone, receivedBuffer, BUFFER_SIZE);
+
+    // char *bufferCloneFree = trim(bufferClone);
+
+    // char *commandString = strtok(bufferCloneFree, DELIMITER);
+    // char *argumentString = strtok(NULL, "");
+
+    // printf("commandString: %s\n", commandString);
+    // printf("argumentString: %s\n", argumentString);
+    // printf("receivedBuffer: %s\n", receivedBuffer);
+
+    // char *commandString = strtok(receivedBuffer, DELIMITER);
+    // printf("commandString: %s\n", commandString);
 
     Command command = processCommand(
         receivedBuffer,
         BUFFER_SIZE,
-        responseBuffer);
+        responseBuffer,
+        si_outra);
 
     if (command == QUIT)
     {
@@ -126,7 +149,8 @@ void processUdp(int portConfig, char *fileName)
 Command processCommand(
     const char *const buffer,
     const size_t bufferSize,
-    char *response)
+    char *response,
+    struct sockaddr_in si_outra)
 {
   char *bufferClone = malloc(sizeof(buffer[0]) * bufferSize);
 
@@ -134,10 +158,33 @@ Command processCommand(
 
   char *bufferCloneFree = trim(bufferClone);
 
-  char *commandString = strtok(bufferClone, "");
+  char *commandString = strtok(bufferCloneFree, DELIMITER);
   char *argumentString = strtok(NULL, "");
 
   printf("argumentString: %s\n", argumentString);
+
+  if (strncmp(commandString, "LOGIN", 5) == 0)
+  {
+    loginAdmin(argumentString, response);
+    if (strncmp(response, LOGIN_SUCESS, sizeof(LOGIN_SUCESS)) == 0)
+    {
+      for (int i = 0; i < 10; i++)
+      {
+        if (loggedAdmins[i].sin_addr.s_addr == 0)
+        {
+          loggedAdmins[i] = si_outra;
+          break;
+        }
+      }
+    }
+    return LOGIN;
+  }
+
+  if (!isLogged(si_outra))
+  {
+    strcpy(response, "Não autorizado\n");
+    return LOGIN;
+  }
 
   bool commandFound = false;
   Command command = HELP;
@@ -159,6 +206,66 @@ Command processCommand(
   free(bufferCloneFree);
 
   return command;
+}
+
+bool isLogged(struct sockaddr_in si_outra)
+{
+  for (int i = 0; i < 10; i++)
+  {
+    bool isSameIp = loggedAdmins[i].sin_addr.s_addr == si_outra.sin_addr.s_addr;
+    bool isSamePort = loggedAdmins[i].sin_port == si_outra.sin_port;
+
+    if (isSameIp && isSamePort)
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void loginAdmin(const char *const argument, char *response)
+{
+  response[0] = '\0';
+  FILE *users;
+  char buffer[256];
+  users = fopen(usersFile, "r");
+
+  if (users == NULL)
+  {
+    printf("Erro ao abrir arquivo de usuários\n");
+    strcpy(response, "Erro ao abrir arquivo de usuários\n");
+    return;
+  }
+
+  char *argumentClone = malloc(100);
+  strncpy(argumentClone, argument, 100);
+  char *argumentCloneFree = trim(argumentClone);
+
+  char *login = strtok(argumentCloneFree, DELIMITER);
+  char *password = strtok(NULL, "");
+
+  while (fgets(buffer, 256, users) != NULL)
+  {
+    char *user = strtok(buffer, ";");
+    char *pass = strtok(NULL, ";");
+    char *role = strtok(NULL, "");
+    printf("role: %s\n", role);
+
+    if (strcmp(login, user) == 0 && strcmp(pass, password) == 0 && strcmp(role, "administrador\n") == 0)
+    {
+      strcpy(response, LOGIN_SUCESS);
+      break;
+    }
+  }
+
+  if (response[0] == '\0')
+  {
+    strcpy(response, "Usuário ou senha inválidos\n");
+  }
+
+  free(argumentCloneFree);
+  fclose(users);
 }
 
 void addUser(const char *const argument, char *response)
@@ -187,8 +294,7 @@ void addUser(const char *const argument, char *response)
 void deleteUser(const char *const argument, char *response)
 {
   FILE *originalFile, *tempFile;
-  // char buffer[256];
-  // int currentLine = 1;
+  response[0] = '\0';
   char *argumentClone = malloc(100);
   strncpy(argumentClone, argument, 100);
   char *argumentFree = trim(argumentClone);
@@ -237,6 +343,7 @@ void deleteUser(const char *const argument, char *response)
   {
     printf("Usuário não encontrado\n");
     strcpy(response, "Usuário não encontrado\n");
+    return;
   }
 
   fclose(originalFile);
@@ -247,10 +354,14 @@ void deleteUser(const char *const argument, char *response)
 
   // Rename the temporary file to the original filename
   rename("temp.txt", usersFile);
+
+  strcpy(response, "Usuário deletado com sucesso!\n");
 }
 
 void listUsers(const char *const argument, char *response)
 {
+  (void)argument;
+
   FILE *users;
   char buffer[256];
   users = fopen(usersFile, "r");
@@ -286,5 +397,12 @@ void quitServer(const char *const argument, char *response)
 
 void commandHelp(const char *const argument, char *response)
 {
-  printf("HELP");
+  (void)argument;
+
+  strcpy(response, "List of available commands:"
+#define WRAPPER(enum, text, usage, function) \
+  "\n- " usage
+         COMMAND_ENUM
+#undef WRAPPER
+                   "\n");
 }
