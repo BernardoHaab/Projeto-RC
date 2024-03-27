@@ -1,48 +1,65 @@
-#include <unistd.h>
-#include <stdio.h>
+#include "server.h"
 
+#include "admin.h"
 #include "tcp-server.h"
-#include "udp-servers.h"
+#include "udp-server.h"
+
+#include <getopt.h>
+#include <netinet/in.h>
 #include <sched.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
-int main(int argc, char *argv[])
+#define SERVER_PORT_CLASS_DEFAULT  9494
+#define SERVER_PORT_CONFIG_DEFAULT 6767
+
+void usage(const char *const programName)
 {
-  pid_t wpid;
-  int status = 0;
-  int portTurmas, portConfig;
-  char *ficheiroConfig;
+	printf(
+	    "Usage: %s [options] <port classes> <port config> <config file>\n",
+	    programName);
+	printf("Options:\n");
+	printf("  -h, --help                   Print this usage message\n");
 
-  if (argc != 4)
-  {
-    printf("server <port_turmas> <port_config> <ficheiro_config>\n");
-    exit(-1);
-  }
+	exit(EXIT_FAILURE);
+}
 
-  portTurmas = atoi(argv[1]);
-  portConfig = atoi(argv[2]);
-  ficheiroConfig = argv[3];
+int main(int argc, char **argv)
+{
+	char *ipAddress      = SERVER_IP_DEFAULT;
+	int portClass        = SERVER_PORT_CLASS_DEFAULT;
+	int portConfig       = SERVER_PORT_CONFIG_DEFAULT;
+	char *configFilepath = NULL;
 
-  printf("portTurmas: %d\n", portTurmas);
-  printf("portConfig: %d\n", portConfig);
-  printf("ficheiroConfig: %s\n", ficheiroConfig);
+	pid_t wpid;
+	int status = 0;
 
-  // Cria um novo processo para lidar com o cliente
-  if (fork() == 0)
-  {
-    processUdp(portConfig, ficheiroConfig);
-    exit(0);
-    // close(serverSocketFD);
-    // sendMOTD(clientSocketFD, MOTD "\n");
-    // processClient(clientSocketFD, clientIPAddress);
-    // exit(0);
-  }
+	if (argc != 4) {
+		usage(argv[0]);
+	}
 
-  if (fork() == 0)
-  {
-    processTcp();
-    exit(0);
-  }
+	portClass      = atoi(argv[1]);
+	portConfig     = atoi(argv[2]);
+	configFilepath = argv[3];
 
-  while ((wpid = wait(&status)) > 0)
-    ; // this way, the father waits for all the child
+	const TCPSocket classSocket = createTCPSocket(ipAddress, portClass);
+	UDPSocket configSocket      = createUDPSocket(ipAddress, portConfig);
+
+	if (fork() == 0) {
+		setupAdminConsole(&configSocket, configFilepath);
+		exit(0);
+	}
+
+	if (fork() == 0) {
+		// TODO: setup class server
+		exit(0);
+	}
+
+	while ((wpid = wait(&status)) > 0)
+		; // this way, the father waits for all the child
+
+	return 0;
 }

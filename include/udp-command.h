@@ -16,8 +16,6 @@ typedef enum
 #undef WRAPPER
 } Command;
 
-void processUdp();
-
 Command processCommand(
     const char *const buffer,
     const size_t bufferSize,

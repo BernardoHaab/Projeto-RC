@@ -9,6 +9,5 @@ size_t countNChar(
     const char *const string,
     const char character,
     const size_t nBytes);
-void error(char *s);
 
 #endif // !UTILS_H

@@ -1,6 +1,5 @@
 .clangd
-tcp-client
-tcp-server
+server
 
 # GNS 3 Ignore
 project-files/dynamips/**/*_lock
