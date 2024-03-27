@@ -20,6 +20,7 @@
 #define USERS_FILE "./include/users.txt"
 
 char usersFile[100];
+struct sockaddr_in loggedAdmins[10];
 
 void processUdp(int portConfig, char *fileName)
 {
@@ -74,14 +75,19 @@ void processUdp(int portConfig, char *fileName)
     // Para ignorar o restante conteúdo (anterior do buffer)
     receivedBuffer[receivedBytes] = '\0';
 
-    printf("Recebeu mensage: %s\n", receivedBuffer);
+    printf("Recebeu mensage: %s. De: %d\n", receivedBuffer, si_outra.sin_addr.s_addr);
 
-    // addUser(receivedBuffer, responseBuffer);
-    // deleteUser(receivedBuffer, responseBuffer);
-    // listUsers(receivedBuffer, responseBuffer);
-    // quitServer(receivedBuffer, responseBuffer);
+    if (strncmp(receivedBuffer, "X", 1) == 0)
+    {
+      printf("Recebeu");
+      continue;
+    }
 
-    // printf("RESPOSTA: %s\n", responseBuffer);
+    // ToDo: Se for comando de login realizar login
+    // (busca no ficheiro e se existir adiciona endereço no array 'loggedAdmins')
+    // Se não for login: verifica se esta logado procurando na lista 'loggedAdmins'
+    //    - Se não estiver retonar 'Não autrizado'
+    //    - Se estiver executa 'processCommand'
 
     char *commandString = strtok(receivedBuffer, DELIMITER);
     printf("commandString: %s\n", commandString);
@@ -98,6 +104,17 @@ void processUdp(int portConfig, char *fileName)
 
     printf("Processou comando\n");
     printf("Resposta: %s\n", responseBuffer);
+
+    if (sendto(
+            socketFd,
+            responseBuffer,
+            strlen(responseBuffer),
+            0,
+            (struct sockaddr *)&si_outra,
+            slen) < 0)
+    {
+      error("Erro no sendto");
+    }
 
   } while (quit != 1);
 
@@ -237,7 +254,9 @@ void listUsers(const char *const argument, char *response)
   FILE *users;
   char buffer[256];
   users = fopen(usersFile, "r");
-  char userList[BUFFER_SIZE];
+  char userList[BUFFER_SIZE] = "";
+
+  response[0] = '\0';
 
   if (users == NULL)
   {

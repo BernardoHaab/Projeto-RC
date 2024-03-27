@@ -1,4 +1,3 @@
 usuario;senha;alun
 A;B;C
 T;e;S
-ADD_USER;(null);(null)
