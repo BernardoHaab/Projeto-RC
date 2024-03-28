@@ -39,8 +39,17 @@ SOURCES = server tcp-server debug admin udp-server utils command
 server: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 	$(CC) $(CFLAGS) -o $@ $^
 
-install: server
-	cp $@ $(GNS3_DOCKER_DIR)/*/$@
+install-files: assets/users.txt
+	for dir in $(shell find $(GNS3_DOCKER_DIR) -maxdepth 1 -type d) ; do \
+		sudo install --owner=root --group=root --mode=0644 --verbose -D $< "$$dir"/home/$< ; \
+		done
+
+install-exe: server
+	for dir in $(shell find $(GNS3_DOCKER_DIR) -maxdepth 1 -type d) ; do \
+		sudo install --owner=root --group=root --mode=0755 --verbose $< "$$dir"/home/ ; \
+		done
+
+install: install-exe install-files
 
 $(OBJ_DIR)/%.md: %.md
 	mkdir --parents `dirname $@`
