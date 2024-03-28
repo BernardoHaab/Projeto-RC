@@ -37,7 +37,12 @@ SOURCES = server tcp-server debug admin udp-server utils command
 server: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 	$(CC) $(CFLAGS) -o $@ $^
 
-relatorio.pdf: docs/relatorio.md
+$(OBJ_DIR)/%.md: %.md
+	mkdir --parents `dirname $@`
+	cp $< $@
+	sed -i 's|date: date|date: '$(shell date +'%d/%m/%Y')'|' $@
+
+relatorio.pdf: $(OBJ_DIR)/docs/relatorio.md
 	pandoc --standalone --resource-path=assets --output $@ $<
 
 archive: $(ARCHIVE)

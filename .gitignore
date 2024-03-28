@@ -1,4 +1,6 @@
 .clangd
+obj
+*.pdf
 server
 
 # GNS 3 Ignore
