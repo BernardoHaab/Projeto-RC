@@ -1,10 +1,12 @@
 MAKEFLAGS += --jobs=4 --output-sync=target
 
-ARCHIVE     = serviçonoticias-pl8-BernardoHaab-LuísGóis.zip
-INCLUDE_DIR = $(PWD)/include
-OBJ_DIR     = obj
-SRC_DIR     = src
-TARGETS     = server
+ARCHIVE          = serviçonoticias-pl8-BernardoHaab-LuísGóis.zip
+INCLUDE_DIR      = $(PWD)/include
+OBJ_DIR          = obj
+SRC_DIR          = src
+TARGETS          = server
+GNS3_DIR         = project-files
+GNS3_DOCKER_DIR := $(GNS3_DIR)/docker
 
 HEADERS  = $(shell find $(INCLUDE_DIR) \
 	   -name "*.h" -o \
@@ -36,6 +38,9 @@ $(OBJ_DIR)/%.c.o: %.c $(HEADERS)
 SOURCES = server tcp-server debug admin udp-server utils command
 server: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 	$(CC) $(CFLAGS) -o $@ $^
+
+install: server
+	cp $@ $(GNS3_DOCKER_DIR)/*/$@
 
 $(OBJ_DIR)/%.md: %.md
 	mkdir --parents `dirname $@`
