@@ -13,6 +13,16 @@ project-files/dynamips/ilt_*_mips64j
 project-files/dynamips/ilt_*_ppc32e
 project-files/dynamips/ilt_*_ppc32j
 project-files/**/*.log
+project-files/docker
+!project-files/docker/
+project-files/docker/*
+!project-files/docker/*/
+project-files/docker/*/*
+!project-files/docker/*/etc/
+project-files/docker/*/etc/*
+!project-files/docker/*/etc/network/
+project-files/docker/*/etc/network/*
+!project-files/docker/*/etc/network/interfaces
 
 # Xournal++ Ignore
 *.xopp
