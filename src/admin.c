@@ -199,7 +199,7 @@ void listUsers(const CliCommand cliCommand, char *response)
 	// BUG: Empty response.
 	// STEPS TO REPRODUCE: Type the command LIST with additional arguments
 	// and then just the LIST command without arguments
-	if (cliCommand.size != 1) {
+	if (cliCommand.nargs != 1) {
 		// TODO: Usage
 		return;
 	}
@@ -248,7 +248,7 @@ void loginAdmin(const CliCommand cliCommand, char *response)
 		return;
 	}
 
-	if (cliCommand.size != 3) {
+	if (cliCommand.nargs != 3) {
 		// TODO: usage
 		return;
 	}
@@ -265,8 +265,8 @@ void loginAdmin(const CliCommand cliCommand, char *response)
 		return;
 	}
 
-	const char *const username = cliCommand.data[1];
-	const char *const password = cliCommand.data[2];
+	const char *const username = cliCommand.args[1];
+	const char *const password = cliCommand.args[2];
 
 	while (fgets(buffer, 256, users) != NULL) {
 		// TODO: Use Vector API
