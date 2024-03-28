@@ -32,8 +32,17 @@ void setupAdminConsole(UDPSocket *udpSocket, const char *const configFilepath)
 
 		char response[BUFFER_SIZE + 1]
 		    = {[0] = '\0', [BUFFER_SIZE] = '\0'};
+
 		parseCliCommand(udpSocket->buffer, &cliCommand);
-		sprintCliCommand(response, cliCommand);
+
+		debugMessage(stdout,
+		             INFO,
+		             "Received: \"%s\" from ",
+		             udpSocket->buffer);
+		printSocketIP(stdout, true, clientIP);
+
+		debugMessage(stdout, INFO, "");
+		printCliCommand(stdout, cliCommand);
 
 		command
 		    = processAdminCommand(cliCommand, response, BUFFER_SIZE);
