@@ -4,6 +4,8 @@
 #include "command.h"
 #include "udp-server.h"
 
+#include <stdbool.h>
+
 #define ADMIN_COMMAND_ENUM                                                     \
 	WRAPPER(HELP, "help", "help", commandHelp)                             \
 	WRAPPER(                                                               \
@@ -31,7 +33,10 @@ AdminCommand processAdminCommand(const CliCommand cliCommand,
                                  char *responseBuffer,
                                  const size_t responseBufferSize);
 
-#define LOGIN_SUCESS "Logged in succesfully!\n"
+#define LOGIN_SUCESS         "Logged in succesfully!\n"
+#define USER_NOT_FOUND       "User not found!\n"
+#define USER_DELETED_SUCCESS "User was deleted with success!\n"
+#define ADMIN_LOGGED_MAX     10
 
 #define USERNAME_MAX_LENGTH       256
 #define USER_CSV_ENTRY_MAX_LENGTH (USERNAME_MAX_LENGTH) + 256
@@ -43,5 +48,6 @@ void listUsers(const CliCommand cliCommand, char *response);
 void quitServer(const CliCommand cliCommand, char *response);
 void commandHelp(const CliCommand cliCommand, char *response);
 void loginAdmin(const CliCommand cliCommand, char *response);
+bool isLogged(const struct sockaddr_in clientIP);
 
 #endif // !ADMIN_H

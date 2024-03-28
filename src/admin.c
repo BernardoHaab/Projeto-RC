@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 char *usersFilepath = NULL;
-struct sockaddr_in loggedAdmins[10];
+struct sockaddr_in loggedAdmins[ADMIN_LOGGED_MAX];
 
 void setupAdminConsole(UDPSocket *udpSocket, const char *const configFilepath)
 {
@@ -130,27 +130,31 @@ void addUser(const CliCommand cliCommand, char *response)
 
 void deleteUser(const CliCommand cliCommand, char *response)
 {
+	response[0] = '\0';
+
 #define TEMP_FILENAME "temp.txt"
 
-	if (usersFilepath == NULL || cliCommand.nargs != 2) {
+	if (usersFilepath == NULL) {
 		return;
 	}
 
-	FILE *originalFile = NULL;
-	FILE *tempFile     = NULL;
+	if (cliCommand.nargs != 2) {
+		// TODO: Usage
+		return;
+	}
 
 	const char *const userToDelete = cliCommand.args[1];
 
-	originalFile = fopen(usersFilepath, "r");
+	FILE *originalFile = fopen(usersFilepath, "r");
 	if (originalFile == NULL) {
 		fprintf(stderr, "Erro ao abrir arquivo de usuários\n");
 		// TODO: I don't know if I agree that the response should be
 		// this when failing to opening a file
-		strcpy(response, "Usuário não encontrado\n");
+		strcpy(response, USER_NOT_FOUND);
 		return;
 	}
 
-	tempFile = fopen(TEMP_FILENAME, "w");
+	FILE *tempFile = fopen(TEMP_FILENAME, "w");
 	if (tempFile == NULL) {
 		fprintf(stderr, "Error creating temporary file.\n");
 		fclose(originalFile);
@@ -178,8 +182,8 @@ void deleteUser(const CliCommand cliCommand, char *response)
 	}
 
 	if (!found) {
-		fprintf(stderr, "Usuário não encontrado\n");
-		strcpy(response, "Usuário não encontrado\n");
+		fprintf(stderr, USER_NOT_FOUND);
+		strcpy(response, USER_NOT_FOUND);
 	}
 
 	fclose(originalFile);
@@ -188,10 +192,14 @@ void deleteUser(const CliCommand cliCommand, char *response)
 	remove(usersFilepath);
 
 	rename(TEMP_FILENAME, usersFilepath);
+
+	strcpy(response, USER_DELETED_SUCCESS);
 }
 
 void listUsers(const CliCommand cliCommand, char *response)
 {
+	response[0] = '\0';
+
 	if (usersFilepath == NULL) {
 		return;
 	}
@@ -204,11 +212,7 @@ void listUsers(const CliCommand cliCommand, char *response)
 		return;
 	}
 
-	char buffer[256];
-	FILE *users                    = fopen(usersFilepath, "r");
-	char userList[BUFFER_SIZE + 1] = {[0] = '\0', [BUFFER_SIZE] = '\0'};
-	response[0]                    = '\0';
-
+	FILE *users = fopen(usersFilepath, "r");
 	if (users == NULL) {
 		fprintf(stderr, "Erro ao abrir arquivo de usuários\n");
 		// TODO: I don't know if I agree that the response should be
@@ -217,6 +221,8 @@ void listUsers(const CliCommand cliCommand, char *response)
 		return;
 	}
 
+	char buffer[256];
+	char userList[BUFFER_SIZE + 1] = {[0] = '\0', [BUFFER_SIZE] = '\0'};
 	while (fgets(buffer, 256, users) != NULL) {
 		char *user = strtok(buffer, CSV_DELIMITER);
 		strcat(userList, user);
@@ -237,7 +243,13 @@ void quitServer(const CliCommand cliCommand, char *response)
 void commandHelp(const CliCommand cliCommand, char *response)
 {
 	(void) cliCommand;
-	strcpy(response, "Help...\n");
+
+	strcpy(response,
+	       "List of available commands:"
+#define WRAPPER(enum, text, usage, function) "\n- " usage
+	       ADMIN_COMMAND_ENUM
+#undef WRAPPER
+	       "\n");
 }
 
 void loginAdmin(const CliCommand cliCommand, char *response)
@@ -287,4 +299,19 @@ void loginAdmin(const CliCommand cliCommand, char *response)
 	}
 
 	fclose(users);
+}
+
+bool isLogged(const struct sockaddr_in clientIP)
+{
+	for (int i = 0; i < ADMIN_LOGGED_MAX; i++) {
+		bool isSameIp = loggedAdmins[i].sin_addr.s_addr
+		                == clientIP.sin_addr.s_addr;
+		bool isSamePort = loggedAdmins[i].sin_port == clientIP.sin_port;
+
+		if (isSameIp && isSamePort) {
+			return true;
+		}
+	}
+
+	return false;
 }
