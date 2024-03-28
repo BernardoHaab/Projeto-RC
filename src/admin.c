@@ -14,6 +14,7 @@
 #include <unistd.h>
 
 char *usersFilepath = NULL;
+struct sockaddr_in loggedAdmins[10];
 
 void setupAdminConsole(UDPSocket *udpSocket, const char *const configFilepath)
 {
@@ -191,13 +192,22 @@ void deleteUser(const CliCommand cliCommand, char *response)
 
 void listUsers(const CliCommand cliCommand, char *response)
 {
-	if (usersFilepath == NULL || cliCommand.nargs != 1) {
+	if (usersFilepath == NULL) {
+		return;
+	}
+
+	// BUG: Empty response.
+	// STEPS TO REPRODUCE: Type the command LIST with additional arguments
+	// and then just the LIST command without arguments
+	if (cliCommand.size != 1) {
+		// TODO: Usage
 		return;
 	}
 
 	char buffer[256];
-	FILE *users = fopen(usersFilepath, "r");
-	char userList[BUFFER_SIZE];
+	FILE *users                    = fopen(usersFilepath, "r");
+	char userList[BUFFER_SIZE + 1] = {[0] = '\0', [BUFFER_SIZE] = '\0'};
+	response[0]                    = '\0';
 
 	if (users == NULL) {
 		fprintf(stderr, "Erro ao abrir arquivo de usuários\n");
@@ -228,4 +238,53 @@ void commandHelp(const CliCommand cliCommand, char *response)
 {
 	(void) cliCommand;
 	strcpy(response, "Help...\n");
+}
+
+void loginAdmin(const CliCommand cliCommand, char *response)
+{
+	response[0] = '\0';
+
+	if (usersFilepath == NULL) {
+		return;
+	}
+
+	if (cliCommand.size != 3) {
+		// TODO: usage
+		return;
+	}
+
+	FILE *users;
+	char buffer[256];
+	users = fopen(usersFilepath, "r");
+
+	if (users == NULL) {
+		debugMessage(stderr, ERROR, "Opening file %s\n", usersFilepath);
+		// TODO: I don't know if I agree that the response should be
+		// this when failing to opening a file
+		sprintf(response, "Error opening file %s\n", usersFilepath);
+		return;
+	}
+
+	const char *const username = cliCommand.data[1];
+	const char *const password = cliCommand.data[2];
+
+	while (fgets(buffer, 256, users) != NULL) {
+		// TODO: Use Vector API
+		char *user = strtok(buffer, ";");
+		char *pass = strtok(NULL, ";");
+		char *role = strtok(NULL, "");
+		printf("role: %s\n", role);
+
+		if (strcmp(username, user) == 0 && strcmp(pass, password) == 0
+		    && strcmp(role, "administrador\n") == 0) {
+			strcpy(response, LOGIN_SUCESS);
+			break;
+		}
+	}
+
+	if (response[0] == '\0') {
+		strcpy(response, "Invalid User or Password\n");
+	}
+
+	fclose(users);
 }

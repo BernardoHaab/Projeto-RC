@@ -16,7 +16,8 @@
 	        "DELETE_USER <username>",                                      \
 	        deleteUser)                                                    \
 	WRAPPER(LIST_USERS, "LIST_USERS", "LIST_USERS", listUsers)             \
-	WRAPPER(QUIT, "QUIT", "QUIT", quitServer)
+	WRAPPER(QUIT, "QUIT", "QUIT", quitServer)                              \
+	WRAPPER(LOGIN, "LOGIN", "LOGIN <username> <password>", loginAdmin)
 
 typedef enum {
 #define WRAPPER(enum, text, usage, function) enum,
@@ -30,6 +31,8 @@ AdminCommand processAdminCommand(const CliCommand cliCommand,
                                  char *responseBuffer,
                                  const size_t responseBufferSize);
 
+#define LOGIN_SUCESS "Logged in succesfully!\n"
+
 #define USERNAME_MAX_LENGTH       256
 #define USER_CSV_ENTRY_MAX_LENGTH (USERNAME_MAX_LENGTH) + 256
 #define CSV_DELIMITER             ";"
@@ -39,5 +42,6 @@ void deleteUser(const CliCommand cliCommand, char *response);
 void listUsers(const CliCommand cliCommand, char *response);
 void quitServer(const CliCommand cliCommand, char *response);
 void commandHelp(const CliCommand cliCommand, char *response);
+void loginAdmin(const CliCommand cliCommand, char *response);
 
 #endif // !ADMIN_H
