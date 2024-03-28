@@ -2,6 +2,7 @@
 obj
 *.pdf
 server
+*.zip
 
 # GNS 3 Ignore
 project-files/dynamips/**/*_lock
