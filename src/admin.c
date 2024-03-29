@@ -86,7 +86,7 @@ AdminCommand processAdminCommand(const CliCommand cliCommand,
 		command      = enum;                                 \
 		function(cliCommand, responseBuffer);                \
 	}
-	ADMIN_COMMAND_ENUM
+	ADMIN_COMMANDS
 #undef WRAPPER
 
 	if (!commandFound) {
@@ -256,7 +256,7 @@ void commandHelp(const CliCommand cliCommand, char *response)
 	strcpy(response,
 	       "List of available commands:"
 #define WRAPPER(enum, text, usage, function) "\n- " usage
-	       ADMIN_COMMAND_ENUM
+	       ADMIN_COMMANDS
 #undef WRAPPER
 	       "\n");
 }

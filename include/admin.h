@@ -6,7 +6,7 @@
 
 #include <stdbool.h>
 
-#define ADMIN_COMMAND_ENUM                                                     \
+#define ADMIN_COMMANDS                                                     \
 	WRAPPER(ADMIN_HELP, "help", "help", commandHelp)                       \
 	WRAPPER(                                                               \
 	    ADMIN_ADD_USER,                                                    \
@@ -23,7 +23,7 @@
 
 typedef enum {
 #define WRAPPER(ENUM, COMMAND, USAGE, FUNCTION) ENUM,
-	ADMIN_COMMAND_ENUM
+	ADMIN_COMMANDS
 #undef WRAPPER
 } AdminCommand;
 
@@ -46,7 +46,7 @@ bool isLogged(const struct sockaddr_in clientIP);
 
 #define WRAPPER(ENUM, COMMAND, USAGE, FUNCTION) \
 	void FUNCTION(const CliCommand cliCommand, char *response);
-ADMIN_COMMAND_ENUM
+ADMIN_COMMANDS
 #undef WRAPPER
 
 #endif // !ADMIN_H
