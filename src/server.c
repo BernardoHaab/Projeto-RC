@@ -1,6 +1,7 @@
 #include "server.h"
 
 #include "admin.h"
+#include "class.h"
 #include "tcp-server.h"
 #include "udp-server.h"
 
@@ -14,8 +15,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define SERVER_PORT_CLASS_DEFAULT  9494
-#define SERVER_PORT_CONFIG_DEFAULT 6767
 char *usersFilepath = NULL;
 
 void usage(const char *const programName)
@@ -31,10 +30,7 @@ void usage(const char *const programName)
 
 int main(int argc, char **argv)
 {
-	char *ipAddress      = SERVER_IP_DEFAULT;
-	int portClass        = SERVER_PORT_CLASS_DEFAULT;
-	int portConfig       = SERVER_PORT_CONFIG_DEFAULT;
-	char *configFilepath = NULL;
+	char *ipAddress = SERVER_IP_DEFAULT;
 
 	pid_t wpid;
 	int status = 0;
@@ -50,12 +46,12 @@ int main(int argc, char **argv)
 		usage(argv[0]);
 	}
 
-	portClass      = atoi(argv[1]);
-	portConfig     = atoi(argv[2]);
-	usersFilepath  = argv[3];
+	const int portClass  = atoi(argv[1]);
+	const int portConfig = atoi(argv[2]);
+	usersFilepath        = argv[3];
 
-	const TCPSocket classSocket = createTCPSocket(ipAddress, portClass);
-	UDPSocket configSocket      = createUDPSocket(ipAddress, portConfig);
+	TCPSocket classSocket  = createTCPSocket(ipAddress, portClass);
+	UDPSocket configSocket = createUDPSocket(ipAddress, portConfig);
 
 	if (fork() == 0) {
 		setupAdminConsole(&configSocket);
@@ -63,7 +59,7 @@ int main(int argc, char **argv)
 	}
 
 	if (fork() == 0) {
-		// TODO: setup class server
+		setupClass(&classSocket);
 		exit(0);
 	}
 
