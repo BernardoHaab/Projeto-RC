@@ -4,7 +4,7 @@ ARCHIVE          = serviçonoticias-pl8-BernardoHaab-LuísGóis.zip
 INCLUDE_DIR      = $(PWD)/include
 OBJ_DIR          = obj
 SRC_DIR          = src
-TARGETS          = server
+TARGETS          = class_server class_client
 GNS3_DIR         = project-files
 GNS3_DOCKER_DIR := $(GNS3_DIR)/docker
 
@@ -35,8 +35,12 @@ $(OBJ_DIR)/%.c.o: %.c $(HEADERS)
 	mkdir -p `dirname $@`
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-SOURCES = server tcp-server debug admin udp-server utils command
-server: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+SOURCES = server tcp-server udp-server command admin class debug utils
+class_server: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+	$(CC) $(CFLAGS) -o $@ $^
+
+SOURCES = client
+class_client: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 	$(CC) $(CFLAGS) -o $@ $^
 
 install-files: assets/users.txt
@@ -44,7 +48,7 @@ install-files: assets/users.txt
 		sudo install --owner=root --group=root --mode=0644 --verbose -D $< "$$dir"/home/$< ; \
 		done
 
-install-exe: server
+install-exe: $(TARGETS)
 	for dir in $(shell find $(GNS3_DOCKER_DIR) -maxdepth 1 -type d) ; do \
 		sudo install --owner=root --group=root --mode=0755 --verbose $< "$$dir"/home/ ; \
 		done

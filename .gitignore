@@ -1,7 +1,8 @@
 .clangd
+class_client
+class_server
 obj
 *.pdf
-server
 *.zip
 
 # GNS 3 Ignore
