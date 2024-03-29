@@ -9,6 +9,7 @@
 #include <sched.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -37,6 +38,13 @@ int main(int argc, char **argv)
 
 	pid_t wpid;
 	int status = 0;
+
+	for (int i = 0; i < argc; ++i) {
+		const char *const arg = argv[i];
+		if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0) {
+			usage(argv[0]);
+		}
+	}
 
 	if (argc != 4) {
 		usage(argv[0]);
