@@ -17,17 +17,6 @@
 
 char *usersFilepath = NULL;
 
-void usage(const char *const programName)
-{
-	printf(
-	    "Usage: %s [options] <port classes> <port config> <config file>\n",
-	    programName);
-	printf("Options:\n");
-	printf("  -h, --help                   Print this usage message\n");
-
-	exit(EXIT_FAILURE);
-}
-
 int main(int argc, char **argv)
 {
 	char *ipAddress = SERVER_IP_DEFAULT;
@@ -67,4 +56,15 @@ int main(int argc, char **argv)
 		; // this way, the father waits for all the child
 
 	return 0;
+}
+
+void usage(const char *const programName)
+{
+	printf(
+	    "Usage: %s [options] <port classes> <port config> <config file>\n",
+	    programName);
+	printf("Options:\n");
+	printf("  -h, --help                   Print this usage message\n");
+
+	exit(EXIT_FAILURE);
 }
