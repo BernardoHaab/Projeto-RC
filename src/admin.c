@@ -2,6 +2,7 @@
 
 #include "command.h"
 #include "debug.h"
+#include "server.h"
 #include "udp-server.h"
 
 #include <bits/types/struct_iovec.h>
@@ -13,15 +14,11 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-char *usersFilepath = NULL;
 struct sockaddr_in loggedAdmins[ADMIN_LOGGED_MAX];
 
-void setupAdminConsole(UDPSocket *udpSocket, const char *const configFilepath)
+void setupAdminConsole(UDPSocket *udpSocket)
 {
-	printf("Started Admin Console\n");
-
-	usersFilepath = malloc(sizeof(usersFilepath[0]) * 256);
-	usersFilepath = strcpy(usersFilepath, configFilepath);
+	debugMessage(stdout, OK, "Started Admin Console\n");
 
 	CliCommand cliCommand = {0};
 	AdminCommand command  = ADMIN_HELP;
@@ -58,7 +55,6 @@ void setupAdminConsole(UDPSocket *udpSocket, const char *const configFilepath)
 		}
 	}
 
-	free(usersFilepath);
 	destroyCliCommand(&cliCommand);
 
 	// TODO: Corrigir o close do socket?

@@ -27,7 +27,7 @@ typedef enum {
 #undef WRAPPER
 } AdminCommand;
 
-void setupAdminConsole(UDPSocket *udpSocket, const char *const configFilepath);
+void setupAdminConsole(UDPSocket *udpSocket);
 
 AdminCommand processAdminCommand(const CliCommand cliCommand,
                                  char *responseBuffer,
