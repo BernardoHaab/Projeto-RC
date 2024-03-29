@@ -274,10 +274,7 @@ void loginAdmin(const CliCommand cliCommand, char *response)
 		return;
 	}
 
-	FILE *users;
-	char buffer[256];
-	users = fopen(usersFilepath, "r");
-
+	FILE *users = fopen(usersFilepath, "r");
 	if (users == NULL) {
 		debugMessage(stderr, ERROR, "Opening file %s\n", usersFilepath);
 		// TODO: I don't know if I agree that the response should be
@@ -289,7 +286,8 @@ void loginAdmin(const CliCommand cliCommand, char *response)
 	const char *const username = cliCommand.args[1];
 	const char *const password = cliCommand.args[2];
 
-	while (fgets(buffer, 256, users) != NULL) {
+	char buffer[USER_CSV_ENTRY_MAX_LENGTH + 1] = {[0] = '\0'};
+	while (fgets(buffer, USER_CSV_ENTRY_MAX_LENGTH, users) != NULL) {
 		// TODO: Use Vector API
 		char *user = strtok(buffer, ";");
 		char *pass = strtok(NULL, ";");
