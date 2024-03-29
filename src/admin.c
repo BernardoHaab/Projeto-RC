@@ -24,9 +24,9 @@ void setupAdminConsole(UDPSocket *udpSocket, const char *const configFilepath)
 	usersFilepath = strcpy(usersFilepath, configFilepath);
 
 	CliCommand cliCommand = {0};
-	AdminCommand command  = HELP;
+	AdminCommand command  = ADMIN_HELP;
 
-	while (command != QUIT) {
+	while (command != ADMIN_QUIT) {
 		const struct sockaddr_in clientIP
 		    = receiveFromUDPSocket(udpSocket);
 
@@ -73,13 +73,13 @@ AdminCommand processAdminCommand(const CliCommand cliCommand,
 		strncpy(responseBuffer,
 		        "Command not found. Tip: Type \"help\"\n",
 		        responseBufferSize);
-		return HELP;
+		return ADMIN_HELP;
 	}
 
 	const size_t commandLength = strlen(cliCommand.args[0]);
 
 	bool commandFound    = false;
-	AdminCommand command = HELP;
+	AdminCommand command = ADMIN_HELP;
 #define WRAPPER(enum, text, usage, function)                         \
 	if (strncmp(cliCommand.args[0], text, commandLength) == 0) { \
 		commandFound = true;                                 \

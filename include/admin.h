@@ -7,22 +7,22 @@
 #include <stdbool.h>
 
 #define ADMIN_COMMAND_ENUM                                                     \
-	WRAPPER(HELP, "help", "help", commandHelp)                             \
+	WRAPPER(ADMIN_HELP, "help", "help", commandHelp)                       \
 	WRAPPER(                                                               \
-	    ADD_USER,                                                          \
+	    ADMIN_ADD_USER,                                                    \
 	    "ADD_USER",                                                        \
 	    "ADD_USER <username> <password> <administrador/aluno/professor> ", \
 	    addUser)                                                           \
-	WRAPPER(DELETE_USER,                                                   \
+	WRAPPER(ADMIN_DELETE_USER,                                             \
 	        "DELETE_USER",                                                 \
 	        "DELETE_USER <username>",                                      \
 	        deleteUser)                                                    \
-	WRAPPER(LIST_USERS, "LIST_USERS", "LIST_USERS", listUsers)             \
-	WRAPPER(QUIT, "QUIT", "QUIT", quitServer)                              \
-	WRAPPER(LOGIN, "LOGIN", "LOGIN <username> <password>", loginAdmin)
+	WRAPPER(ADMIN_LIST_USERS, "LIST_USERS", "LIST_USERS", listUsers)       \
+	WRAPPER(ADMIN_QUIT, "QUIT", "QUIT", quitServer)                        \
+	WRAPPER(ADMIN_LOGIN, "LOGIN", "LOGIN <username> <password>", loginAdmin)
 
 typedef enum {
-#define WRAPPER(enum, text, usage, function) enum,
+#define WRAPPER(ENUM, COMMAND, USAGE, FUNCTION) ENUM,
 	ADMIN_COMMAND_ENUM
 #undef WRAPPER
 } AdminCommand;
@@ -42,12 +42,11 @@ AdminCommand processAdminCommand(const CliCommand cliCommand,
 #define USER_CSV_ENTRY_MAX_LENGTH (USERNAME_MAX_LENGTH) + 256
 #define CSV_DELIMITER             ";"
 
-void addUser(const CliCommand cliCommand, char *response);
-void deleteUser(const CliCommand cliCommand, char *response);
-void listUsers(const CliCommand cliCommand, char *response);
-void quitServer(const CliCommand cliCommand, char *response);
-void commandHelp(const CliCommand cliCommand, char *response);
-void loginAdmin(const CliCommand cliCommand, char *response);
 bool isLogged(const struct sockaddr_in clientIP);
+
+#define WRAPPER(ENUM, COMMAND, USAGE, FUNCTION) \
+	void FUNCTION(const CliCommand cliCommand, char *response);
+ADMIN_COMMAND_ENUM
+#undef WRAPPER
 
 #endif // !ADMIN_H
