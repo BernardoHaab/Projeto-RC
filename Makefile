@@ -39,7 +39,7 @@ SOURCES = server tcp/socket tcp/server udp-server command admin class debug util
 class_server: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 	$(CC) $(CFLAGS) -o $@ $^
 
-SOURCES = client
+SOURCES = client tcp/socket tcp/client debug utils
 class_client: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 	$(CC) $(CFLAGS) -o $@ $^
 
