@@ -24,7 +24,7 @@ void setupAdminConsole(UDPSocket *serverUDPSocket)
 	CliCommand cliCommand = {0};
 	AdminCommand command  = ADMIN_HELP;
 
-	while (command != ADMIN_QUIT) {
+	while (command != ADMIN_QUIT_SERVER) {
 		UDPSocket clientUDPSocket
 		    = receiveFromUDPSocket(serverUDPSocket);
 
@@ -85,7 +85,7 @@ AdminCommand processAdminCommand(const CliCommand cliCommand,
 	return command;
 }
 
-void addUser(const CliCommand cliCommand, char *response)
+void adminAddUserCommand(const CliCommand cliCommand, char *response)
 {
 	if (usersFilepath == NULL) {
 		return;
@@ -124,7 +124,7 @@ void addUser(const CliCommand cliCommand, char *response)
 	strcpy(response, "Usuário adicionado com sucesso!\n");
 }
 
-void deleteUser(const CliCommand cliCommand, char *response)
+void adminDeleteUserCommand(const CliCommand cliCommand, char *response)
 {
 	response[0] = '\0';
 
@@ -192,7 +192,7 @@ void deleteUser(const CliCommand cliCommand, char *response)
 	strcpy(response, USER_DELETED_SUCCESS);
 }
 
-void listUsers(const CliCommand cliCommand, char *response)
+void adminListUsersCommand(const CliCommand cliCommand, char *response)
 {
 	response[0] = '\0';
 
@@ -230,13 +230,13 @@ void listUsers(const CliCommand cliCommand, char *response)
 	fclose(users);
 }
 
-void quitServer(const CliCommand cliCommand, char *response)
+void adminQuitServerCommand(const CliCommand cliCommand, char *response)
 {
 	(void) cliCommand;
 	strcpy(response, "Closing server...!\n");
 }
 
-void commandHelp(const CliCommand cliCommand, char *response)
+void adminHelpCommand(const CliCommand cliCommand, char *response)
 {
 	(void) cliCommand;
 
@@ -248,7 +248,7 @@ void commandHelp(const CliCommand cliCommand, char *response)
 	       "\n");
 }
 
-void loginAdmin(const CliCommand cliCommand, char *response)
+void adminLoginCommand(const CliCommand cliCommand, char *response)
 {
 	response[0] = '\0';
 

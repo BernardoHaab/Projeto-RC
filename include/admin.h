@@ -6,20 +6,34 @@
 
 #include <stdbool.h>
 
-#define ADMIN_COMMANDS                                                         \
-	WRAPPER(ADMIN_HELP, "help", "help", commandHelp)                       \
-	WRAPPER(                                                               \
-	    ADMIN_ADD_USER,                                                    \
-	    "ADD_USER",                                                        \
-	    "ADD_USER <username> <password> <administrador/aluno/professor> ", \
-	    addUser)                                                           \
-	WRAPPER(ADMIN_DELETE_USER,                                             \
-	        "DELETE_USER",                                                 \
-	        "DELETE_USER <username>",                                      \
-	        deleteUser)                                                    \
-	WRAPPER(ADMIN_LIST_USERS, "LIST_USERS", "LIST_USERS", listUsers)       \
-	WRAPPER(ADMIN_QUIT, "QUIT", "QUIT", quitServer)                        \
-	WRAPPER(ADMIN_LOGIN, "LOGIN", "LOGIN <username> <password>", loginAdmin)
+#define ADMIN_NOT_LOGGED_IN_COMMANDS                          \
+	WRAPPER(ADMIN_HELP, "help", "help", adminHelpCommand) \
+	WRAPPER(ADMIN_LOGIN,                                  \
+	        "LOGIN",                                      \
+	        "LOGIN <username> <password>",                \
+	        adminLoginCommand)
+
+#define ADMIN_LOGGED_IN_COMMANDS                                           \
+	WRAPPER(ADMIN_ADD_USER,                                            \
+	        "ADD_USER",                                                \
+	        "ADD_USER <username> <password> <admin/student/teacher> ", \
+	        adminAddUserCommand)                                       \
+	WRAPPER(ADMIN_DELETE_USER,                                         \
+	        "DEL",                                                     \
+	        "DEL <username>",                                          \
+	        adminDeleteUserCommand)                                    \
+	WRAPPER(ADMIN_LIST_USERS,                                          \
+	        "LIST_USERS",                                              \
+	        "LIST_USERS",                                              \
+	        adminListUsersCommand)                                     \
+	WRAPPER(ADMIN_QUIT_SERVER,                                         \
+	        "QUIT_SERVER",                                             \
+	        "QUIT_SERVER",                                             \
+	        adminQuitServerCommand)
+
+#define ADMIN_COMMANDS               \
+	ADMIN_NOT_LOGGED_IN_COMMANDS \
+	ADMIN_LOGGED_IN_COMMANDS
 
 typedef enum {
 #define WRAPPER(ENUM, COMMAND, USAGE, FUNCTION) ENUM,
