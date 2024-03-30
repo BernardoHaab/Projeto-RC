@@ -2,7 +2,7 @@
 #define CLASS_H
 
 #include "command.h"
-#include "tcp-server.h"
+#include "tcp/socket.h"
 
 #define ROLE_ENUM           \
 	WRAPPER(GUEST, 0)   \

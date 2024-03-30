@@ -2,7 +2,8 @@
 
 #include "admin.h"
 #include "class.h"
-#include "tcp-server.h"
+#include "tcp/server.h"
+#include "tcp/socket.h"
 #include "udp-server.h"
 
 #include <getopt.h>
@@ -39,7 +40,7 @@ int main(int argc, char **argv)
 	const int portConfig = atoi(argv[2]);
 	usersFilepath        = argv[3];
 
-	TCPSocket classSocket  = createTCPSocket(ipAddress, portClass);
+	TCPSocket classSocket  = createListeningTCPSocket(ipAddress, portClass);
 	UDPSocket configSocket = createUDPSocket(ipAddress, portConfig);
 
 	if (fork() == 0) {
