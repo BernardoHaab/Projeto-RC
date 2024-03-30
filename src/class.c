@@ -47,6 +47,9 @@ void setupClass(TCPSocket *serverTCPSocket)
 
 void processClient(TCPSocket clientTCPSocket)
 {
+	writeToTCPSocketBuffer(&clientTCPSocket, MOTD);
+	writeToTCPSocket(&clientTCPSocket);
+
 	do {
 		const int nRead = readFromTCPSocket(&clientTCPSocket);
 		if (nRead <= 0) {

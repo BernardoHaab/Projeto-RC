@@ -4,6 +4,8 @@
 #include "command.h"
 #include "tcp/socket.h"
 
+#define MOTD "Bem-vindo à turma\n"
+
 #define ROLE_ENUM           \
 	WRAPPER(GUEST, 0)   \
 	WRAPPER(STUDENT, 1) \

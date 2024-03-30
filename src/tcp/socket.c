@@ -45,6 +45,11 @@ ssize_t readFromTCPSocket(TCPSocket *connectingTCPSocket)
 	return receivedBytes;
 }
 
+void writeToTCPSocketBuffer(TCPSocket *tcpSocket, const char *const string)
+{
+	strncpy(tcpSocket->buffer, string, BUFFER_SIZE);
+}
+
 void writeToTCPSocket(TCPSocket *tcpSocket)
 {
 	write(tcpSocket->fileDescriptor,
