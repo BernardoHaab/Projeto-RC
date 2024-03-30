@@ -12,7 +12,7 @@
     "show_grid": true,
     "show_interface_labels": true,
     "show_layers": false,
-    "snap_to_grid": false,
+    "snap_to_grid": true,
     "supplier": null,
     "topology": {
         "computes": [],
@@ -28,7 +28,7 @@
             },
             {
                 "drawing_id": "c93da02d-1367-4719-8467-0f7b54d6b302",
-                "locked": false,
+                "locked": true,
                 "rotation": 0,
                 "svg": "<svg width=\"543\" height=\"243\"><rect width=\"543\" height=\"243\" fill=\"#\" fill-opacity=\"0.0\" stroke-dasharray=\"25, 25\" stroke-width=\"2\" stroke=\"#000000\" /></svg>",
                 "x": -374,
@@ -998,7 +998,7 @@
                     "x": 3,
                     "y": -25
                 },
-                "locked": false,
+                "locked": true,
                 "name": "Server",
                 "node_id": "1879808a-db80-476f-95e8-fdf308daf3e3",
                 "node_type": "docker",
@@ -1042,7 +1042,7 @@
                     "x": -1,
                     "y": -25
                 },
-                "locked": false,
+                "locked": true,
                 "name": "Cliente1",
                 "node_id": "e4da3661-f2bc-4754-82ce-0eb9e956e4d9",
                 "node_type": "docker",
@@ -1086,7 +1086,7 @@
                     "x": -1,
                     "y": -25
                 },
-                "locked": false,
+                "locked": true,
                 "name": "Cliente2",
                 "node_id": "58927dfd-a4a6-458e-90f8-2d07eee82faa",
                 "node_type": "docker",
@@ -1130,7 +1130,7 @@
                     "x": -1,
                     "y": -25
                 },
-                "locked": false,
+                "locked": true,
                 "name": "Cliente3",
                 "node_id": "143030a0-dfa5-4462-a4aa-0be181e1551f",
                 "node_type": "docker",
