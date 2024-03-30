@@ -3,6 +3,8 @@
 
 #include "netinet/in.h"
 
+#include <sys/types.h>
+
 #define BUFFER_SIZE 1024
 
 typedef struct {
@@ -13,10 +15,11 @@ typedef struct {
 
 struct sockaddr_in createSocketAddress(const char *const ipAddress,
                                        const int port);
+TCPSocket createEmptyTCPSocket(void);
 
-void readFromTCPSocket(TCPSocket *tcpSocket);
+ssize_t readFromTCPSocket(TCPSocket *tcpSocket);
+void closeTCPSocket(TCPSocket *tcpSocket);
 void writeToTCPSocketBuffer(TCPSocket *tcpSocket, const char *const string);
 void writeToTCPSocket(TCPSocket *tcpSocket);
-void closeTCPSocket(TCPSocket *tcpSocket);
 
 #endif // !TCP_SOCKET_H

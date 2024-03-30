@@ -21,7 +21,16 @@ struct sockaddr_in createSocketAddress(const char *const ipAddress,
 	return socket;
 }
 
-void readFromTCPSocket(TCPSocket *connectingTCPSocket)
+TCPSocket createEmptyTCPSocket(void)
+{
+	return (TCPSocket){
+	    .fileDescriptor = -1,
+	    .buffer         = {0},
+	    .address        = {0},
+	};
+}
+
+ssize_t readFromTCPSocket(TCPSocket *connectingTCPSocket)
 {
 	ssize_t receivedBytes = read(connectingTCPSocket->fileDescriptor,
 	                             connectingTCPSocket->buffer,
@@ -32,6 +41,8 @@ void readFromTCPSocket(TCPSocket *connectingTCPSocket)
 	}
 
 	connectingTCPSocket->buffer[receivedBytes] = '\0';
+
+	return receivedBytes;
 }
 
 void writeToTCPSocket(TCPSocket *tcpSocket)

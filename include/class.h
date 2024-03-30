@@ -62,5 +62,6 @@ CLASS_COMMANDS
 #undef WRAPPER
 
 void setupClass(TCPSocket *tcpSocket);
+void processClient(const TCPSocket clientTCPSocket);
 
 #endif // !CLASS_H

@@ -5,5 +5,6 @@
 
 TCPSocket createListeningTCPSocket(const char *const listeningIPAddress,
                                    const int listeningPort);
+TCPSocket acceptFromTCPSocket(const TCPSocket listeningTCPSocket);
 
 #endif // !TCP_SERVER_H

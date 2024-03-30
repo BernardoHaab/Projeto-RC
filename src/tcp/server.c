@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 TCPSocket createListeningTCPSocket(const char *const listeningIPAddress,
                                    const int listeningPort)
@@ -32,4 +33,17 @@ TCPSocket createListeningTCPSocket(const char *const listeningIPAddress,
 	}
 
 	return tcpSocket;
+}
+
+TCPSocket acceptFromTCPSocket(const TCPSocket listeningTCPSocket)
+{
+	TCPSocket clientTCPSocket       = createEmptyTCPSocket();
+	socklen_t clientTCPSocketLength = sizeof(clientTCPSocket.address);
+
+	clientTCPSocket.fileDescriptor
+	    = accept(listeningTCPSocket.fileDescriptor,
+	             (struct sockaddr *) &clientTCPSocket.address,
+	             &clientTCPSocketLength);
+
+	return clientTCPSocket;
 }
