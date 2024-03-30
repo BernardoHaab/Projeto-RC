@@ -484,8 +484,8 @@
                             "rotation": 0,
                             "style": "font-family: TypeWriter;font-size: 10.0;font-weight: bold;fill: #000000;fill-opacity: 1.0;",
                             "text": "f0/0",
-                            "x": -34,
-                            "y": -5
+                            "x": -39,
+                            "y": -9
                         },
                         "node_id": "bf84ef1a-7416-46d7-9ba8-05f20b55c643",
                         "port_number": 0
@@ -536,8 +536,8 @@
                             "rotation": 0,
                             "style": "font-family: TypeWriter;font-size: 10.0;font-weight: bold;fill: #000000;fill-opacity: 1.0;",
                             "text": "f0/0",
-                            "x": 32,
-                            "y": -17
+                            "x": 40,
+                            "y": -33
                         },
                         "node_id": "ea74f424-b210-4869-b7ad-3a4f285bf194",
                         "port_number": 0
@@ -548,8 +548,8 @@
                             "rotation": 0,
                             "style": "font-family: TypeWriter;font-size: 10.0;font-weight: bold;fill: #000000;fill-opacity: 1.0;",
                             "text": "eth0",
-                            "x": 33,
-                            "y": 69
+                            "x": -17,
+                            "y": 67
                         },
                         "node_id": "1879808a-db80-476f-95e8-fdf308daf3e3",
                         "port_number": 0
@@ -568,8 +568,8 @@
                             "rotation": 0,
                             "style": "font-family: TypeWriter;font-size: 10.0;font-weight: bold;fill: #000000;fill-opacity: 1.0;",
                             "text": "e1",
-                            "x": 63,
-                            "y": -12
+                            "x": 72,
+                            "y": -24
                         },
                         "node_id": "3b68173d-37d8-4f3e-b1d6-b1fec338aa52",
                         "port_number": 1
@@ -600,8 +600,8 @@
                             "rotation": 0,
                             "style": "font-family: TypeWriter;font-size: 10.0;font-weight: bold;fill: #000000;fill-opacity: 1.0;",
                             "text": "e2",
-                            "x": 66,
-                            "y": -9
+                            "x": 70,
+                            "y": 34
                         },
                         "node_id": "3b68173d-37d8-4f3e-b1d6-b1fec338aa52",
                         "port_number": 2
@@ -1164,5 +1164,5 @@
     "type": "topology",
     "variables": null,
     "version": "2.2.46",
-    "zoom": 84
+    "zoom": 71
 }
