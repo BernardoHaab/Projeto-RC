@@ -2,11 +2,11 @@
 #define ADMIN_H
 
 #include "command.h"
-#include "udp-server.h"
+#include "udp/socket.h"
 
 #include <stdbool.h>
 
-#define ADMIN_COMMANDS                                                     \
+#define ADMIN_COMMANDS                                                         \
 	WRAPPER(ADMIN_HELP, "help", "help", commandHelp)                       \
 	WRAPPER(                                                               \
 	    ADMIN_ADD_USER,                                                    \
@@ -27,7 +27,7 @@ typedef enum {
 #undef WRAPPER
 } AdminCommand;
 
-void setupAdminConsole(UDPSocket *udpSocket);
+void setupAdminConsole(UDPSocket *serverUDPSocket);
 
 AdminCommand processAdminCommand(const CliCommand cliCommand,
                                  char *responseBuffer,

@@ -35,7 +35,7 @@ $(OBJ_DIR)/%.c.o: %.c $(HEADERS)
 	mkdir -p `dirname $@`
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-SOURCES = server tcp/socket tcp/server udp-server command admin class debug utils
+SOURCES = server tcp/socket tcp/server udp/socket udp/server command admin class debug utils
 class_server: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 	$(CC) $(CFLAGS) -o $@ $^
 

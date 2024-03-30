@@ -4,15 +4,12 @@
 #include "class.h"
 #include "tcp/server.h"
 #include "tcp/socket.h"
-#include "udp-server.h"
+#include "udp/server.h"
+#include "udp/socket.h"
 
-#include <getopt.h>
-#include <netinet/in.h>
-#include <sched.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -41,7 +38,7 @@ int main(int argc, char **argv)
 	usersFilepath        = argv[3];
 
 	TCPSocket classSocket  = createListeningTCPSocket(ipAddress, portClass);
-	UDPSocket configSocket = createUDPSocket(ipAddress, portConfig);
+	UDPSocket configSocket = createBindedUDPSocket(ipAddress, portConfig);
 
 	if (fork() == 0) {
 		setupAdminConsole(&configSocket);

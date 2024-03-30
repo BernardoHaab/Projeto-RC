@@ -3,7 +3,8 @@
 #include "command.h"
 #include "debug.h"
 #include "server.h"
-#include "udp-server.h"
+#include "udp/socket.h"
+#include "utils.h"
 
 #include <bits/types/struct_iovec.h>
 #include <netinet/in.h>
@@ -16,7 +17,7 @@
 
 struct sockaddr_in loggedAdmins[ADMIN_LOGGED_MAX];
 
-void setupAdminConsole(UDPSocket *udpSocket)
+void setupAdminConsole(UDPSocket *serverUDPSocket)
 {
 	debugMessage(stdout, OK, "Started Admin Console\n");
 
@@ -24,41 +25,31 @@ void setupAdminConsole(UDPSocket *udpSocket)
 	AdminCommand command  = ADMIN_HELP;
 
 	while (command != ADMIN_QUIT) {
-		const struct sockaddr_in clientIP
-		    = receiveFromUDPSocket(udpSocket);
+		UDPSocket clientUDPSocket
+		    = receiveFromUDPSocket(serverUDPSocket);
 
-		char response[BUFFER_SIZE + 1]
-		    = {[0] = '\0', [BUFFER_SIZE] = '\0'};
-
-		parseCliCommand(udpSocket->buffer, &cliCommand);
+		parseCliCommand(trim(serverUDPSocket->buffer), &cliCommand);
 
 		debugMessage(stdout,
 		             INFO,
 		             "Received: \"%s\" from ",
-		             udpSocket->buffer);
-		printSocketIP(stdout, true, clientIP);
+		             serverUDPSocket->buffer);
+		printSocketIP(stdout, true, clientUDPSocket.address);
 
 		debugMessage(stdout, INFO, "");
 		printCliCommand(stdout, cliCommand);
 
-		command
-		    = processAdminCommand(cliCommand, response, BUFFER_SIZE);
+		command = processAdminCommand(cliCommand,
+		                              clientUDPSocket.buffer,
+		                              BUFFER_SIZE);
 
-		if (sendto(udpSocket->fileDescriptor,
-		           response,
-		           strnlen(response, BUFFER_SIZE),
-		           0,
-		           (struct sockaddr *) &clientIP,
-		           sizeof(clientIP))
-		    < 0) {
-			error("Error sendto");
-		}
+		sendToUDPSocket(&clientUDPSocket);
 	}
 
 	destroyCliCommand(&cliCommand);
 
 	// TODO: Corrigir o close do socket?
-	close(udpSocket->fileDescriptor);
+	closeUDPSocket(serverUDPSocket);
 }
 
 AdminCommand processAdminCommand(const CliCommand cliCommand,
