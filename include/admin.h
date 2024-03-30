@@ -4,6 +4,7 @@
 #include "command.h"
 #include "udp/socket.h"
 
+#include <netinet/in.h>
 #include <stdbool.h>
 
 #define ADMIN_NOT_LOGGED_IN_COMMANDS                          \
@@ -35,17 +36,13 @@
 	ADMIN_NOT_LOGGED_IN_COMMANDS \
 	ADMIN_LOGGED_IN_COMMANDS
 
+#define ADMIN_ROLE "administrator"
+
 typedef enum {
 #define WRAPPER(ENUM, COMMAND, USAGE, FUNCTION) ENUM,
 	ADMIN_COMMANDS
 #undef WRAPPER
 } AdminCommand;
-
-void setupAdminConsole(UDPSocket *serverUDPSocket);
-
-AdminCommand processAdminCommand(const CliCommand cliCommand,
-                                 char *responseBuffer,
-                                 const size_t responseBufferSize);
 
 #define LOGIN_SUCESS             "Logged in succesfully!\n"
 #define INVALID_USER_OR_PASSWORD "Invalid User or Password\n"
@@ -57,11 +54,20 @@ AdminCommand processAdminCommand(const CliCommand cliCommand,
 #define USER_CSV_ENTRY_MAX_LENGTH (USERNAME_MAX_LENGTH) + 256
 #define CSV_DELIMITER             ";"
 
-bool isLogged(const struct sockaddr_in clientIP);
-
 #define WRAPPER(ENUM, COMMAND, USAGE, FUNCTION) \
 	void FUNCTION(const CliCommand cliCommand, char *response);
 ADMIN_COMMANDS
 #undef WRAPPER
+
+
+AdminCommand processAdminCommand(const CliCommand cliCommand,
+                                 const bool isLoggedIn,
+                                 char *responseBuffer,
+                                 const size_t responseBufferSize);
+bool isLogged(const struct sockaddr_in clientIP);
+void addLogin(struct sockaddr_in *loggedAdmins,
+              const size_t loggedAdminsSize,
+              const struct sockaddr_in clientIP);
+void setupAdminConsole(UDPSocket *serverUDPSocket);
 
 #endif // !ADMIN_H

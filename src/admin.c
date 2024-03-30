@@ -16,6 +16,7 @@
 #include <unistd.h>
 
 struct sockaddr_in loggedAdmins[ADMIN_LOGGED_MAX];
+struct sockaddr_in globalCurrentClientIP;
 
 void setupAdminConsole(UDPSocket *serverUDPSocket)
 {
@@ -39,9 +40,11 @@ void setupAdminConsole(UDPSocket *serverUDPSocket)
 		debugMessage(stdout, INFO, "");
 		printCliCommand(stdout, cliCommand);
 
-		command = processAdminCommand(cliCommand,
-		                              clientUDPSocket.buffer,
-		                              BUFFER_SIZE);
+		globalCurrentClientIP = clientUDPSocket.address;
+		command               = processAdminCommand(cliCommand,
+                                              isLogged(globalCurrentClientIP),
+                                              clientUDPSocket.buffer,
+                                              BUFFER_SIZE);
 
 		sendToUDPSocket(&clientUDPSocket);
 	}
@@ -53,6 +56,7 @@ void setupAdminConsole(UDPSocket *serverUDPSocket)
 }
 
 AdminCommand processAdminCommand(const CliCommand cliCommand,
+                                 const bool isLoggedIn,
                                  char *responseBuffer,
                                  const size_t responseBufferSize)
 {
@@ -73,7 +77,18 @@ AdminCommand processAdminCommand(const CliCommand cliCommand,
 		FUNCTION(cliCommand, responseBuffer);   \
 		break;                                  \
 	}
-		ADMIN_COMMANDS
+		ADMIN_NOT_LOGGED_IN_COMMANDS
+#undef WRAPPER
+#define WRAPPER(ENUM, COMMAND, USAGE, FUNCTION)               \
+	if (strcmp(cliCommand.args[0], COMMAND) == 0) {       \
+		commandFound = true;                          \
+		if (isLoggedIn) {                             \
+			command = ENUM;                       \
+			FUNCTION(cliCommand, responseBuffer); \
+		}                                             \
+		break;                                        \
+	}
+		ADMIN_LOGGED_IN_COMMANDS
 #undef WRAPPER
 	} while (false);
 
@@ -277,16 +292,25 @@ void adminLoginCommand(const CliCommand cliCommand, char *response)
 	char buffer[USER_CSV_ENTRY_MAX_LENGTH + 1] = {[0] = '\0'};
 	while (fgets(buffer, USER_CSV_ENTRY_MAX_LENGTH, users) != NULL) {
 		// TODO: Use Vector API
-		char *user = strtok(buffer, ";");
-		char *pass = strtok(NULL, ";");
-		char *role = strtok(NULL, "");
-		printf("role: %s\n", role);
+		const char *const user = strtok(trim(buffer), CSV_DELIMITER);
+		const char *const pass = strtok(NULL, CSV_DELIMITER);
+		const char *const role = strtok(NULL, CSV_DELIMITER);
 
-		if (strcmp(username, user) == 0 && strcmp(pass, password) == 0
-		    && strcmp(role, "administrador\n") == 0) {
-			strcpy(response, LOGIN_SUCESS);
-			break;
+		if (strcmp(role, ADMIN_ROLE) != 0) {
+			continue;
 		}
+
+		if (strcmp(user, username) != 0) {
+			continue;
+		}
+
+		if (strcmp(pass, password) != 0) {
+			continue;
+		}
+
+		addLogin(loggedAdmins, ADMIN_LOGGED_MAX, globalCurrentClientIP);
+		strcpy(response, LOGIN_SUCESS);
+		break;
 	}
 
 	if (response[0] == '\0') {
@@ -309,4 +333,20 @@ bool isLogged(const struct sockaddr_in clientIP)
 	}
 
 	return false;
+}
+
+void addLogin(struct sockaddr_in *loggedAdmins,
+              const size_t loggedAdminsSize,
+              const struct sockaddr_in clientIP)
+{
+	for (size_t i = 0; i < loggedAdminsSize; ++i) {
+		const struct sockaddr_in c = loggedAdmins[i];
+
+		if (c.sin_addr.s_addr != 0) {
+			continue;
+		}
+
+		loggedAdmins[i] = clientIP;
+		break;
+	}
 }

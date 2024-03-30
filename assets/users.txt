@@ -1,3 +1,4 @@
 user;password;role
-A;B;C
-T;e;S
+jorge;mtu67453;administrator
+manuel;zpt567;aluno
+joana;azq1212;professor
