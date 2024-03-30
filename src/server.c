@@ -7,6 +7,7 @@
 #include "udp/server.h"
 #include "udp/socket.h"
 
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,18 +41,35 @@ int main(int argc, char **argv)
 	TCPSocket classSocket  = createListeningTCPSocket(ipAddress, portClass);
 	UDPSocket configSocket = createBindedUDPSocket(ipAddress, portConfig);
 
-	if (fork() == 0) {
+	pid_t adminPid;
+	if ((adminPid = fork()) == 0) {
 		setupAdminConsole(&configSocket);
 		exit(0);
+	} else if (adminPid < 0) {
+		perror("Error forking for setupAdminConsole");
+		exit(EXIT_FAILURE);
 	}
 
-	if (fork() == 0) {
+	pid_t classPid;
+	if ((classPid = fork()) == 0) {
 		setupClass(&classSocket);
 		exit(0);
+	} else if (classPid < 0) {
+		perror("Error forking for setupClass");
+		exit(EXIT_FAILURE);
 	}
 
-	while ((wpid = wait(&status)) > 0)
-		; // this way, the father waits for all the child
+	if (waitpid(adminPid, NULL, 0) == -1) {
+		perror("Error waiting for adminPid");
+	}
+
+	if (kill(classPid, SIGTERM) == -1) {
+		perror("Error sending SIGTERM to child process for setupClass");
+		if (kill(classPid, SIGKILL) == -1) {
+			perror("Error sending SIGKILL to child process for "
+			       "setupClass");
+		}
+	}
 
 	return 0;
 }
