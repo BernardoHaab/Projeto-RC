@@ -289,7 +289,7 @@ void adminLoginCommand(const CliCommand cliCommand, char *response)
 	}
 
 	if (response[0] == '\0') {
-		strcpy(response, "Invalid User or Password\n");
+		strcpy(response, INVALID_USER_OR_PASSWORD);
 	}
 
 	fclose(users);
