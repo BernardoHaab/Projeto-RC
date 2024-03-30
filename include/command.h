@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define CLI_COMMAND_DELIMITER " "
+#define CLI_COMMAND_DELIMITER " \n"
 
 typedef struct {
 	char **args;
