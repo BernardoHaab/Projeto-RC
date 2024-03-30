@@ -63,18 +63,19 @@ AdminCommand processAdminCommand(const CliCommand cliCommand,
 		return ADMIN_HELP;
 	}
 
-	const size_t commandLength = strlen(cliCommand.args[0]);
-
 	bool commandFound    = false;
 	AdminCommand command = ADMIN_HELP;
-#define WRAPPER(enum, text, usage, function)                         \
-	if (strncmp(cliCommand.args[0], text, commandLength) == 0) { \
-		commandFound = true;                                 \
-		command      = enum;                                 \
-		function(cliCommand, responseBuffer);                \
+	do {
+#define WRAPPER(ENUM, COMMAND, USAGE, FUNCTION)         \
+	if (strcmp(cliCommand.args[0], COMMAND) == 0) { \
+		commandFound = true;                    \
+		command      = ENUM;                    \
+		FUNCTION(cliCommand, responseBuffer);   \
+		break;                                  \
 	}
-	ADMIN_COMMANDS
+		ADMIN_COMMANDS
 #undef WRAPPER
+	} while (false);
 
 	if (!commandFound) {
 		strncpy(responseBuffer,
