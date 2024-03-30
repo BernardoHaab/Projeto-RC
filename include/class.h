@@ -29,19 +29,19 @@ typedef enum {
 	        "LOGIN <username> <password>",                \
 	        classLoginCommand)
 #define CLASS_LOGGED_IN_COMMANDS              \
-	WRAPPER(CLASS_LIST_CLASSES,                 \
+	WRAPPER(CLASS_LIST_CLASSES,           \
 	        "LIST_CLASSES",               \
 	        "LIST_CLASSES",               \
 	        classListClassesCommand)      \
-	WRAPPER(CLASS_LIST_SUBSCRIBED,              \
+	WRAPPER(CLASS_LIST_SUBSCRIBED,        \
 	        "LIST_SUBSCRIBED",            \
 	        "LIST_SUBSCRIBED",            \
 	        classListSubscribedCommand)   \
-	WRAPPER(CLASS_SUBSCRIBE_CLASS,              \
+	WRAPPER(CLASS_SUBSCRIBE_CLASS,        \
 	        "SUBSCRIBE_CLASS",            \
 	        "SUBSCRIBE_CLASS <class>",    \
 	        classSubscribeClassCommand)   \
-	WRAPPER(CLASS_CREATE_CLASS,                 \
+	WRAPPER(CLASS_CREATE_CLASS,           \
 	        "CREATE_CLASS",               \
 	        "CREATE_CLASS <name> <size>", \
 	        classCreateClassCommand)      \
