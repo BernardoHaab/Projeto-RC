@@ -1,12 +1,13 @@
 MAKEFLAGS += --jobs=4 --output-sync=target
 
 ARCHIVE          = serviçonoticias-pl8-BernardoHaab-LuísGóis.zip
+DOCKER_TAG       = projeto/linux
+GNS3_DIR         = project-files
+GNS3_DOCKER_DIR := $(GNS3_DIR)/docker
 INCLUDE_DIR      = $(PWD)/include
 OBJ_DIR          = obj
 SRC_DIR          = src
 TARGETS          = class_server class_client
-GNS3_DIR         = project-files
-GNS3_DOCKER_DIR := $(GNS3_DIR)/docker
 
 HEADERS  = $(shell find $(INCLUDE_DIR) \
 	   -name "*.h" -o \
@@ -54,6 +55,10 @@ install-exe: $(TARGETS)
 		done
 
 install: install-exe install-files
+
+.PHONY: docker
+docker: Dockerfile
+	docker build --tag $(DOCKER_TAG) --file $^ .
 
 $(OBJ_DIR)/%.md: %.md
 	mkdir --parents `dirname $@`
