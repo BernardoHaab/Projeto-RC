@@ -46,12 +46,16 @@ class_client: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
 install-files: assets/users.txt
 	for dir in $(shell find $(GNS3_DOCKER_DIR) -maxdepth 1 -type d) ; do \
-		sudo install --owner=root --group=root --mode=0644 --verbose -D $< "$$dir"/home/$< ; \
+		for target in $^ ; do \
+		sudo install --owner=root --group=root --mode=0755 --verbose -D "$$target" "$$dir"/home/ ; \
+		done ; \
 		done
 
 install-exe: $(TARGETS)
 	for dir in $(shell find $(GNS3_DOCKER_DIR) -maxdepth 1 -type d) ; do \
-		sudo install --owner=root --group=root --mode=0755 --verbose $< "$$dir"/home/ ; \
+		for target in $^ ; do \
+		sudo install --owner=root --group=root --mode=0755 --verbose "$$target" "$$dir"/home/ ; \
+		done ; \
 		done
 
 install: install-exe install-files
