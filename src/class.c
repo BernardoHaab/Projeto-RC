@@ -239,11 +239,11 @@ void classListClassesCommand(const CliCommand cliCommand, char *response)
 	                     shmFd,
 	                     0);
 
-	for (int i = 0; i < CLASS_MAX_SIZE; i++) {
-		// if (classes_ptr[i].name != NULL) {
-		// 	break;
-		// }
+	sprintf(response, "Class ");
 
+	bool isFirstClass = true;
+
+	for (int i = 0; i < CLASS_MAX_SIZE; i++) {
 		char ip[INET_ADDRSTRLEN] = {0};
 
 		inet_ntop(AF_INET,
@@ -251,17 +251,19 @@ void classListClassesCommand(const CliCommand cliCommand, char *response)
 		          ip,
 		          INET_ADDRSTRLEN);
 
-		// printf("Class: %s, Ip: %s\n", classes_ptr[i].name, ip);
-
-		printf("Created class %s with ip %s\n",
-		       classes_ptr[i].name,
-		       inet_ntoa(classes_ptr[i].ipMulticast.sin_addr));
+		if (classes_ptr[i].name != NULL
+		    && classes_ptr[i].name[0] != '\0') {
+			if (!isFirstClass) {
+				strcat(response, ", ");
+			} else {
+				isFirstClass = false;
+			}
+			strcat(response, classes_ptr[i].name);
+		}
 	}
 
 	munmap(classes_ptr, sizeof(struct Class) * CLASS_MAX_SIZE);
 	close(shmFd);
-
-	sprintf(response, "Not implemented %s\n", usersFilepath);
 }
 
 void classListSubscribedCommand(const CliCommand cliCommand, char *response)
