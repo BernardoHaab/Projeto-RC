@@ -150,17 +150,25 @@ ClassCommand processClassCommand(const CliCommand cliCommand,
 bool isClientLogged(const struct sockaddr_in clientIP)
 {
 	for (int i = 0; i < CLIENT_LOGGED_MAX; i++) {
-		bool isSameIp = loggedClients[i].clientAddrs.sin_addr.s_addr
-		                == clientIP.sin_addr.s_addr;
-		bool isSamePort = loggedClients[i].clientAddrs.sin_port
-		                  == clientIP.sin_port;
+		// bool isSameIp = loggedClients[i].clientAddrs.sin_addr.s_addr
+		//                 == clientIP.sin_addr.s_addr;
+		// bool isSamePort = loggedClients[i].clientAddrs.sin_port
+		//                   == clientIP.sin_port;
 
-		if (isSameIp && isSamePort) {
+		if (isSameAddress(loggedClients[i].clientAddrs, clientIP)) {
 			return true;
 		}
 	}
 
 	return false;
+}
+
+bool isSameAddress(const struct sockaddr_in a, const struct sockaddr_in b)
+{
+	bool isSameIp   = a.sin_addr.s_addr == b.sin_addr.s_addr;
+	bool isSamePort = a.sin_port == b.sin_port;
+
+	return isSameIp && isSamePort;
 }
 
 void classLoginCommand(const CliCommand cliCommand, char *response)
@@ -255,9 +263,8 @@ void classListClassesCommand(const CliCommand cliCommand, char *response)
 		    && classes_ptr[i].name[0] != '\0') {
 			if (!isFirstClass) {
 				strcat(response, ", ");
-			} else {
-				isFirstClass = false;
 			}
+			isFirstClass = false;
 			strcat(response, classes_ptr[i].name);
 		}
 	}
@@ -270,7 +277,60 @@ void classListSubscribedCommand(const CliCommand cliCommand, char *response)
 {
 	(void) cliCommand;
 	response[0] = '\0';
-	sprintf(response, "Not implemented %s\n", usersFilepath);
+
+	if (currentClient.role != STUDENT) {
+		sprintf(response, "UNAUTHORIZED");
+		return;
+	}
+
+
+	int shmFd = shm_open(CLASSES_OBJ_NAME, O_RDWR, S_IRUSR | S_IWUSR);
+	ftruncate(shmFd, sizeof(struct Class) * CLASS_MAX_SIZE);
+
+	Class *classes_ptr
+	    = (Class *) mmap(NULL,
+	                     sizeof(struct Class) * CLASS_MAX_SIZE,
+	                     PROT_READ | PROT_WRITE,
+	                     MAP_SHARED,
+	                     shmFd,
+	                     0);
+
+
+	bool isFirstClass = true;
+
+	sprintf(response, "Class ");
+
+	for (int i = 0; i < CLASS_MAX_SIZE; i++) {
+		if (classes_ptr[i].currentStudents == 0) {
+			continue;
+		}
+
+		for (int j = 0; j < CLASS_MAX_SIZE; j++) {
+			if (isSameAddress(classes_ptr[i].students[j],
+			                  globalCurrentReqIP)) {
+				char multicastIp[21] = {0};
+				sprintf(
+				    multicastIp,
+				    "%s:%d",
+				    inet_ntoa(
+				        classes_ptr[i].ipMulticast.sin_addr),
+				    classes_ptr[i].ipMulticast.sin_port);
+
+				if (!isFirstClass) {
+					strcat(response, ", ");
+				}
+				isFirstClass = false;
+
+				strcat(response, classes_ptr[i].name);
+				strcat(response, "/");
+				strcat(response, multicastIp);
+			}
+		}
+	}
+	strcat(response, "\n");
+
+	munmap(classes_ptr, sizeof(struct Class) * CLASS_MAX_SIZE);
+	close(shmFd);
 }
 
 void classSubscribeClassCommand(const CliCommand cliCommand, char *response)
@@ -300,13 +360,13 @@ void classSubscribeClassCommand(const CliCommand cliCommand, char *response)
 
 	for (int i = 0; i < CLASS_MAX_SIZE; i++) {
 		if (strcmp(classes_ptr[i].name, className) == 0) {
-			printf("Class: %s", classes_ptr[i].name);
 			if (classes_ptr[i].currentStudents
 			    < classes_ptr[i].maxStudents) {
 				classes_ptr[i]
 				    .students[classes_ptr[i].currentStudents]
 				    = globalCurrentReqIP;
-				classes_ptr[i].currentStudents++;
+				classes_ptr[i].currentStudents
+				    = classes_ptr[i].currentStudents + 1;
 				sprintf(
 				    response,
 				    "ACCEPTED %s\n",
@@ -316,7 +376,6 @@ void classSubscribeClassCommand(const CliCommand cliCommand, char *response)
 			break;
 		}
 	}
-
 
 	munmap(classes_ptr, sizeof(struct Class) * CLASS_MAX_SIZE);
 	close(shmFd);
@@ -473,4 +532,10 @@ void addClientLogin(struct LoggedClient *loggedClients,
 		loggedClients[i] = currentClient;
 		break;
 	}
+}
+
+
+void getFormatedIp(struct sockaddr_in ip, char *buffer)
+{
+	sprintf(buffer, "%s:%d", inet_ntoa(ip.sin_addr), ip.sin_port);
 }

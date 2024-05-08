@@ -87,8 +87,8 @@ typedef struct LoggedClient {
 typedef struct Class {
 	char name[50];
 	struct sockaddr_in ipMulticast;
-	size_t maxStudents;
-	size_t currentStudents;
+	int maxStudents;
+	int currentStudents;
 	struct sockaddr_in students[CLASS_MAX_SIZE];
 } Class;
 
@@ -98,6 +98,7 @@ ClassCommand processClassCommand(const CliCommand cliCommand,
                                  char *responseBuffer,
                                  const size_t responseBufferSize);
 bool isClientLogged(const struct sockaddr_in clientIP);
+bool isSameAddress(const struct sockaddr_in a, const struct sockaddr_in b);
 struct sockaddr_in createNewIpMultiCast();
 void resetClasses();
 void addClientLogin(struct LoggedClient *loggedClients,
@@ -106,5 +107,6 @@ void addClientLogin(struct LoggedClient *loggedClients,
                     const Role role);
 void setupClass(TCPSocket *tcpSocket);
 void processClient(const TCPSocket clientTCPSocket);
+void getFormatedIp(struct sockaddr_in ip, char *buffer);
 
 #endif // !CLASS_H
