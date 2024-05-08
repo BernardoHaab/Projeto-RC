@@ -25,11 +25,13 @@
 struct LoggedClient loggedClients[CLIENT_LOGGED_MAX];
 struct LoggedClient currentClient;
 struct sockaddr_in globalCurrentReqIP;
-struct Class classes[MAX_CLASSES];
+// struct Class classes[MAX_CLASSES];
 
 void setupClass(TCPSocket *serverTCPSocket)
 {
 	debugMessage(stdout, OK, "Started Class Console\n");
+
+	resetClasses();
 
 	loop
 	{
@@ -177,7 +179,8 @@ void classLoginCommand(const CliCommand cliCommand, char *response)
 	FILE *users = fopen(usersFilepath, "r");
 	if (users == NULL) {
 		debugMessage(stderr, ERROR, "Opening file %s\n", usersFilepath);
-
+		// TODO: I don't know if I agree that the response should be
+		// this when failing to opening a file
 		sprintf(response, "Error opening file %s\n", usersFilepath);
 		return;
 	}
@@ -223,19 +226,54 @@ void classLoginCommand(const CliCommand cliCommand, char *response)
 
 void classListClassesCommand(const CliCommand cliCommand, char *response)
 {
+	(void) cliCommand;
 	response[0] = '\0';
+	int shmFd   = shm_open(CLASSES_OBJ_NAME, O_RDWR, S_IRUSR | S_IWUSR);
+	ftruncate(shmFd, sizeof(struct Class) * CLASS_MAX_SIZE);
+
+	Class *classes_ptr
+	    = (Class *) mmap(NULL,
+	                     sizeof(struct Class) * CLASS_MAX_SIZE,
+	                     PROT_READ | PROT_WRITE,
+	                     MAP_SHARED,
+	                     shmFd,
+	                     0);
+
+	for (int i = 0; i < CLASS_MAX_SIZE; i++) {
+		// if (classes_ptr[i].name != NULL) {
+		// 	break;
+		// }
+
+		char ip[INET_ADDRSTRLEN] = {0};
+
+		inet_ntop(AF_INET,
+		          &classes_ptr[i].ipMulticast.sin_addr,
+		          ip,
+		          INET_ADDRSTRLEN);
+
+		// printf("Class: %s, Ip: %s\n", classes_ptr[i].name, ip);
+
+		printf("Created class %s with ip %s\n",
+		       classes_ptr[i].name,
+		       inet_ntoa(classes_ptr[i].ipMulticast.sin_addr));
+	}
+
+	munmap(classes_ptr, sizeof(struct Class) * CLASS_MAX_SIZE);
+	close(shmFd);
 
 	sprintf(response, "Not implemented %s\n", usersFilepath);
 }
 
 void classListSubscribedCommand(const CliCommand cliCommand, char *response)
 {
+	(void) cliCommand;
 	response[0] = '\0';
 	sprintf(response, "Not implemented %s\n", usersFilepath);
 }
 
 void classSubscribeClassCommand(const CliCommand cliCommand, char *response)
 {
+	(void) cliCommand;
 	response[0] = '\0';
 	sprintf(response, "Not implemented %s\n", usersFilepath);
 }
@@ -244,19 +282,134 @@ void classCreateClassCommand(const CliCommand cliCommand, char *response)
 {
 	response[0] = '\0';
 
-	sprintf(response, "Not implemented\n");
+	if (currentClient.role != TEACHER) {
+		sprintf(response,
+		        "You don't have permission to create a class.\n");
+		return;
+	}
+
+	char *className       = cliCommand.args[1];
+	const int maxStudents = atoi(cliCommand.args[2]);
+
+	char *teste = malloc(strlen(className) + 1);
+	teste[0]    = '\0';
+
+	sprintf(teste, "%s", className);
+
+	printf("className: %s\n", className);
+	printf("Teste: %s\n", teste);
+
+
+	int shmFd
+	    = shm_open(CLASSES_OBJ_NAME, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+
+	ftruncate(shmFd, sizeof(struct Class) * CLASS_MAX_SIZE);
+	Class *classes_ptr
+	    = (Class *) mmap(NULL,
+	                     sizeof(struct Class) * CLASS_MAX_SIZE,
+	                     PROT_READ | PROT_WRITE,
+	                     MAP_SHARED,
+	                     shmFd,
+	                     0);
+
+	for (int i = 0; i < CLASS_MAX_SIZE; i++) {
+		if (classes_ptr[i].maxStudents == 0) {
+			classes_ptr[i] = (struct Class){
+			    .name            = teste,
+			    .maxStudents     = maxStudents,
+			    .students        = {{0}},
+			    .currentStudents = 0,
+			    .ipMulticast     = createNewIpMultiCast(),
+			};
+
+			printf("Created class %s with ip %s\n",
+			       classes_ptr[i].name,
+			       inet_ntoa(classes_ptr[i].ipMulticast.sin_addr));
+
+			break;
+		}
+	}
+
+	munmap(classes_ptr, sizeof(struct Class) * CLASS_MAX_SIZE);
+	close(shmFd);
+
+	sprintf(response, "OK ipTeste\n");
 }
 
 void classSendCommand(const CliCommand cliCommand, char *response)
 {
+	(void) cliCommand;
 	response[0] = '\0';
 	sprintf(response, "Not implemented %s\n", usersFilepath);
 }
 
 void classHelpCommand(const CliCommand cliCommand, char *response)
 {
+	(void) cliCommand;
 	response[0] = '\0';
 	sprintf(response, "Not implemented %s\n", usersFilepath);
+}
+
+struct sockaddr_in createNewIpMultiCast()
+{
+	int shmFd
+	    = shm_open(MULTICAST_OBJ_NAME, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+
+	ftruncate(shmFd, sizeof(int));
+	int *lastUsedIp = (int *) mmap(NULL,
+	                               sizeof(int),
+	                               PROT_READ | PROT_WRITE,
+	                               MAP_SHARED,
+	                               shmFd,
+	                               0);
+
+	printf("lastUsedIp: %d\n", *lastUsedIp);
+
+	*lastUsedIp = *lastUsedIp + 1;
+
+	char ip[12] = {0};
+	sprintf(ip, "239.0.0.%d", *lastUsedIp);
+
+	struct sockaddr_in ipMulticast = {0};
+
+	memset(&ipMulticast, 0, sizeof(ipMulticast));
+
+	ipMulticast.sin_family      = AF_INET;
+	ipMulticast.sin_addr.s_addr = inet_addr(ip);
+	ipMulticast.sin_port        = htons(5000);
+
+	munmap(lastUsedIp, sizeof(int));
+	close(shmFd);
+
+	return ipMulticast;
+}
+
+void resetClasses()
+{
+	int shmFd
+	    = shm_open(CLASSES_OBJ_NAME, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+
+	ftruncate(shmFd, sizeof(struct Class) * CLASS_MAX_SIZE);
+	Class *classes_ptr
+	    = (Class *) mmap(NULL,
+	                     sizeof(struct Class) * CLASS_MAX_SIZE,
+	                     PROT_READ | PROT_WRITE,
+	                     MAP_SHARED,
+	                     shmFd,
+	                     0);
+
+	for (int i = 0; i < CLASS_MAX_SIZE; i++) {
+		classes_ptr[i] = (struct Class){
+		    .name            = "",
+		    .maxStudents     = 0,
+		    .students        = {{0}},
+		    .currentStudents = 0,
+		    .ipMulticast     = {0},
+		};
+	}
+
+	munmap(classes_ptr, sizeof(struct Class) * CLASS_MAX_SIZE);
+	close(shmFd);
 }
 
 void addClientLogin(struct LoggedClient *loggedClients,
