@@ -85,7 +85,7 @@ typedef struct LoggedClient {
 } LoggedClient;
 
 typedef struct Class {
-	char *name;
+	char name[50];
 	struct sockaddr_in ipMulticast;
 	size_t maxStudents;
 	size_t currentStudents;
