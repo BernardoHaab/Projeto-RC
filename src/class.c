@@ -277,7 +277,51 @@ void classSubscribeClassCommand(const CliCommand cliCommand, char *response)
 {
 	(void) cliCommand;
 	response[0] = '\0';
-	sprintf(response, "Not implemented %s\n", usersFilepath);
+
+	if (currentClient.role != STUDENT) {
+		sprintf(response, "UNAUTHORIZED");
+		return;
+	}
+
+	char *className = cliCommand.args[1];
+
+	int shmFd = shm_open(CLASSES_OBJ_NAME, O_RDWR, S_IRUSR | S_IWUSR);
+	ftruncate(shmFd, sizeof(struct Class) * CLASS_MAX_SIZE);
+
+	Class *classes_ptr
+	    = (Class *) mmap(NULL,
+	                     sizeof(struct Class) * CLASS_MAX_SIZE,
+	                     PROT_READ | PROT_WRITE,
+	                     MAP_SHARED,
+	                     shmFd,
+	                     0);
+
+	sprintf(response, "REJECTED\n");
+
+	for (int i = 0; i < CLASS_MAX_SIZE; i++) {
+		if (strcmp(classes_ptr[i].name, className) == 0) {
+			printf("Class: %s", classes_ptr[i].name);
+			if (classes_ptr[i].currentStudents
+			    < classes_ptr[i].maxStudents) {
+				classes_ptr[i]
+				    .students[classes_ptr[i].currentStudents]
+				    = globalCurrentReqIP;
+				classes_ptr[i].currentStudents++;
+				sprintf(
+				    response,
+				    "ACCEPTED %s\n",
+				    inet_ntoa(
+				        classes_ptr[i].ipMulticast.sin_addr));
+			}
+			break;
+		}
+	}
+
+
+	munmap(classes_ptr, sizeof(struct Class) * CLASS_MAX_SIZE);
+	close(shmFd);
+
+	// sprintf(response, "Not implemented %s\n", usersFilepath);
 }
 
 void classCreateClassCommand(const CliCommand cliCommand, char *response)
@@ -285,22 +329,12 @@ void classCreateClassCommand(const CliCommand cliCommand, char *response)
 	response[0] = '\0';
 
 	if (currentClient.role != TEACHER) {
-		sprintf(response,
-		        "You don't have permission to create a class.\n");
+		sprintf(response, "UNAUTHORIZED");
 		return;
 	}
 
 	char *className       = cliCommand.args[1];
 	const int maxStudents = atoi(cliCommand.args[2]);
-
-	char *teste = malloc(strlen(className) + 1);
-	teste[0]    = '\0';
-
-	sprintf(teste, "%s", className);
-
-	printf("className: %s\n", className);
-	printf("Teste: %s\n", teste);
-
 
 	int shmFd
 	    = shm_open(CLASSES_OBJ_NAME, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
@@ -317,16 +351,23 @@ void classCreateClassCommand(const CliCommand cliCommand, char *response)
 	for (int i = 0; i < CLASS_MAX_SIZE; i++) {
 		if (classes_ptr[i].maxStudents == 0) {
 			classes_ptr[i] = (struct Class){
-			    .name            = teste,
+			    .name            = {0},
 			    .maxStudents     = maxStudents,
 			    .students        = {{0}},
 			    .currentStudents = 0,
 			    .ipMulticast     = createNewIpMultiCast(),
 			};
 
+			strcpy(classes_ptr[i].name, className);
+
 			printf("Created class %s with ip %s\n",
 			       classes_ptr[i].name,
 			       inet_ntoa(classes_ptr[i].ipMulticast.sin_addr));
+
+			sprintf(response,
+			        "OK %s:%d\n",
+			        inet_ntoa(classes_ptr[i].ipMulticast.sin_addr),
+			        classes_ptr[i].ipMulticast.sin_port);
 
 			break;
 		}
@@ -334,8 +375,6 @@ void classCreateClassCommand(const CliCommand cliCommand, char *response)
 
 	munmap(classes_ptr, sizeof(struct Class) * CLASS_MAX_SIZE);
 	close(shmFd);
-
-	sprintf(response, "OK ipTeste\n");
 }
 
 void classSendCommand(const CliCommand cliCommand, char *response)
