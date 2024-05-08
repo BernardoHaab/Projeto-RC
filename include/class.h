@@ -10,9 +10,10 @@
 #define LOGIN_SUCESS_CLIENT             "OK\n"
 #define INVALID_USER_OR_PASSWORD_CLIENT "REJECTED\n"
 
-#define TEACHER_ROLE     "professor"
-#define STUDENT_ROLE     "aluno"
-#define CLASSES_OBJ_NAME "/classes"
+#define TEACHER_ROLE       "professor"
+#define STUDENT_ROLE       "aluno"
+#define CLASSES_OBJ_NAME   "/classes"
+#define MULTICAST_OBJ_NAME "/multicast"
 
 #define USERNAME_MAX_LENGTH       256
 #define USER_CSV_ENTRY_MAX_LENGTH (USERNAME_MAX_LENGTH) + 256
@@ -84,8 +85,8 @@ typedef struct LoggedClient {
 } LoggedClient;
 
 typedef struct Class {
-	char name[100];
-	char ipMulticast[100];
+	char *name;
+	struct sockaddr_in ipMulticast;
 	size_t maxStudents;
 	size_t currentStudents;
 	struct sockaddr_in students[CLASS_MAX_SIZE];
@@ -97,6 +98,8 @@ ClassCommand processClassCommand(const CliCommand cliCommand,
                                  char *responseBuffer,
                                  const size_t responseBufferSize);
 bool isClientLogged(const struct sockaddr_in clientIP);
+struct sockaddr_in createNewIpMultiCast();
+void resetClasses();
 void addClientLogin(struct LoggedClient *loggedClients,
                     const size_t loggedClientsSize,
                     const struct sockaddr_in clientIP,
