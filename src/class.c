@@ -379,8 +379,6 @@ void classSubscribeClassCommand(const CliCommand cliCommand, char *response)
 
 	munmap(classes_ptr, sizeof(struct Class) * CLASS_MAX_SIZE);
 	close(shmFd);
-
-	// sprintf(response, "Not implemented %s\n", usersFilepath);
 }
 
 void classCreateClassCommand(const CliCommand cliCommand, char *response)
@@ -440,7 +438,71 @@ void classSendCommand(const CliCommand cliCommand, char *response)
 {
 	(void) cliCommand;
 	response[0] = '\0';
-	sprintf(response, "Not implemented %s\n", usersFilepath);
+
+	if (currentClient.role != TEACHER) {
+		sprintf(response, "UNAUTHORIZED");
+		return;
+	}
+
+	char *className = cliCommand.args[1];
+	char *msg       = cliCommand.args[2];
+
+	int shmFd = shm_open(CLASSES_OBJ_NAME, O_RDWR, S_IRUSR | S_IWUSR);
+	ftruncate(shmFd, sizeof(struct Class) * CLASS_MAX_SIZE);
+
+	Class *classes_ptr
+	    = (Class *) mmap(NULL,
+	                     sizeof(struct Class) * CLASS_MAX_SIZE,
+	                     PROT_READ | PROT_WRITE,
+	                     MAP_SHARED,
+	                     shmFd,
+	                     0);
+
+	sprintf(response, "REJECTED\n");
+
+	for (int i = 0; i < CLASS_MAX_SIZE; i++) {
+		if (strcmp(classes_ptr[i].name, className) == 0) {
+			int socketFD;
+
+			if ((socketFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+				perror("socket creation failed");
+				sprintf(response, "ERROR\n");
+				continue;
+			}
+
+			// enable multicast on the socket
+			int enable = 1;
+			if (setsockopt(socketFD,
+			               IPPROTO_IP,
+			               IP_MULTICAST_TTL,
+			               &enable,
+			               sizeof(enable))
+			    < 0) {
+				perror("setsockopt");
+				sprintf(response, "ERROR\n");
+				continue;
+			}
+
+			// send the multicast message
+			if (sendto(
+			        socketFD,
+			        msg,
+			        strnlen(msg, BUFFER_SIZE),
+			        0,
+			        (struct sockaddr *) &classes_ptr[i].ipMulticast,
+			        sizeof(classes_ptr[i].ipMulticast))
+			    < 0) {
+				perror("sendto");
+				sprintf(response, "ERROR\n");
+			}
+
+			sprintf(response, "ACCEPTED\n");
+			break;
+		}
+	}
+
+	munmap(classes_ptr, sizeof(struct Class) * CLASS_MAX_SIZE);
+	close(shmFd);
 }
 
 void classHelpCommand(const CliCommand cliCommand, char *response)
