@@ -471,7 +471,7 @@ void classSendCommand(const CliCommand cliCommand, char *response)
 			}
 
 			// enable multicast on the socket
-			int enable = 1;
+			int enable = 4;
 			if (setsockopt(socketFD,
 			               IPPROTO_IP,
 			               IP_MULTICAST_TTL,
