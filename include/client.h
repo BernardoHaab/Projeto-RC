@@ -86,8 +86,7 @@ void printClientCommand(FILE *file, const ClientCommand command);
                INPUT_PROCESSING,                              \
                RESPONSE_PROCESSING)                           \
 	void INPUT_PROCESSING(const ClientCommand command);   \
-	void RESPONSE_PROCESSING(const ClientCommand command, \
-	                         const char *const response); \
+	void RESPONSE_PROCESSING(const char *const response); \
 	CLIENT_COMMANDS
 #undef CLIENT
 
