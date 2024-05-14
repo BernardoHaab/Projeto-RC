@@ -498,6 +498,7 @@ void classSendCommand(const CliCommand cliCommand, char *response)
 
 			sprintf(response, "ACCEPTED\n");
 			break;
+			close(socketFD);
 		}
 	}
 
