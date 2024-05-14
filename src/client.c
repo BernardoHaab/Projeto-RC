@@ -86,8 +86,9 @@ ClientCommand parseClientCommand(const char *const string)
 {
 	ClientCommand command = {0};
 
-	command.args    = vectorStringSplit(string, CLI_COMMAND_DELIMITER);
-	command.command = parseClientCommandType(vectorGet(&command.args, 0));
+	command.args = vectorStringSplit(string, CLI_COMMAND_DELIMITER);
+	command.command
+	    = parseClientCommandType(*(char **) vectorGet(&command.args, 0));
 
 	return command;
 }
@@ -106,6 +107,19 @@ ClientCommandType parseClientCommandType(const char *const string)
 		return CLIENT_HELP;
 	}
 
+#define CLIENT(ENUM,                         \
+               COMMAND,                      \
+               USAGE,                        \
+               ARGS_MIN,                     \
+               ARGS_MAX,                     \
+               INPUT_PROCESSING,             \
+               RESPONSE_PROCESSING)          \
+	if (strcmp(string, #COMMAND) == 0) { \
+		return ENUM;                 \
+	}
+	CLIENT_COMMANDS
+#undef CLIENT
+
 	return CLIENT_HELP;
 }
 
@@ -113,6 +127,7 @@ char *clientCommandTypeToString(const ClientCommandType command)
 {
 	switch (command) {
 #define CLIENT(ENUM,                \
+               COMMAND,             \
                USAGE,               \
                ARGS_MIN,            \
                ARGS_MAX,            \

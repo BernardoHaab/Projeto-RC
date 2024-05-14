@@ -7,42 +7,49 @@
 
 #define CLIENT_COMMANDS                                \
 	CLIENT(CLIENT_HELP,                            \
+	       help,                                   \
 	       "help",                                 \
 	       -1,                                     \
 	       -1,                                     \
 	       clientHelpInputProcessing,              \
 	       clientHelpResponseProcessing)           \
 	CLIENT(CLIENT_LOGIN,                           \
+	       LOGIN,                                  \
 	       "LOGIN <username> <password>",          \
 	       2,                                      \
 	       2,                                      \
 	       clientLoginInputProcessing,             \
 	       clientLoginResponseProcessing)          \
 	CLIENT(CLIENT_LIST_CLASSES,                    \
+	       LIST_CLASSES,                           \
 	       "LIST_CLASSES",                         \
 	       0,                                      \
 	       0,                                      \
 	       clientListClassesInputProcessing,       \
 	       clientListClassesResponseProcessing)    \
 	CLIENT(CLIENT_LIST_SUBSCRIBED,                 \
+	       LIST_SUBSCRIBED,                        \
 	       "LIST_SUBSCRIBED",                      \
 	       0,                                      \
 	       0,                                      \
 	       clientListSubscribedInputProcessing,    \
 	       clientListSubscribedResponseProcessing) \
 	CLIENT(CLIENT_SUBSCRIBE,                       \
+	       SUBSCRIBE_CLASS,                        \
 	       "SUBSCRIBE_CLASS <class>",              \
 	       1,                                      \
 	       1,                                      \
 	       clientSubscribeInputProcessing,         \
 	       clientSubscribeResponseProcessing)      \
 	CLIENT(CLIENT_CREATE_CLASS,                    \
+	       CREATE_CLASS,                           \
 	       "CREATE_CLASS <name> <size>",           \
 	       2,                                      \
 	       2,                                      \
 	       clientCreateClassInputProcessing,       \
 	       clientCreateClassResponseProcessing)    \
 	CLIENT(CLIENT_SEND,                            \
+	       SEND,                                   \
 	       "SEND <name> <message>",                \
 	       2,                                      \
 	       -1,                                     \
@@ -51,6 +58,7 @@
 
 typedef enum {
 #define CLIENT(ENUM,                \
+               COMMAND,             \
                USAGE,               \
                ARGS_MIN,            \
                ARGS_MAX,            \
@@ -80,6 +88,7 @@ ClientCommand parseClientCommand(const char *const string);
 void printClientCommand(FILE *file, const ClientCommand command);
 
 #define CLIENT(ENUM,                                          \
+               COMMAND,                                       \
                USAGE,                                         \
                ARGS_MIN,                                      \
                ARGS_MAX,                                      \
