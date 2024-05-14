@@ -1,0 +1,111 @@
+\documentclass[a4paper]{article} 
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\input{head}
+
+\begin{document}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Java,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\fancyhead[C]{}
+\hrule \medskip 
+\begin{minipage}{0.295\textwidth} 
+\raggedright
+\footnotesize
+Bernardo Haab  \hfill\\
+Luis Gois
+\end{minipage}
+\begin{minipage}{0.4\textwidth} 
+\centering 
+\large 
+Trabalho  Prático 1 - Meta 1\\ 
+\normalsize 
+Redes de Comunicação\\ 
+\end{minipage}
+\begin{minipage}{0.295\textwidth} 
+\raggedleft
+\today\hfill\\
+\end{minipage}
+\medskip\hrule 
+\bigskip
+
+\newenvironment{itemize*}%
+  {\begin{itemize}%
+    \setlength{\itemsep}{0pt}%
+    \setlength{\parskip}{0pt}}%
+  {\end{itemize}}
+
+\section{Introdução}
+
+Este relatório apresenta as decisões feitas na implementação do projeto de compartilhamento de conteúdo entre professores e alunos. O projeto prevê algumas funcionalidades, divididas entre perfis de "administrador", "professor", e "aluno". 
+
+Aos administradores é atribuída a gerência de utilizadores, podendo adicionar, deletar, ou listar utilizadores. O administrador também pode desligar o servidor, impedindo que professores compartilhem conteúdos com seus alunos. Os professores possuem permissão para criar turmas, e enviar conteúdos a essas turmas. Aos alunos é permitido inscrever-se em turmas criadas por professores, e, a partir deste momento, os alunos passam a receber os conteúdos compartilhados pelos professores. Os alunos ainda podem verificar a turmas existentes, e quais está inscrito.
+
+\section{Decisões arquiteturais}
+
+O servidor é inicializado com o comando já especificado pelo professor: 
+
+\begin{verbatim}
+    class_server {PORTO_TURMAS} {PORTO_CONFIG} {ficheiro configuração}
+\end{verbatim}
+
+Ao inicializar, o servidor utiliza o \textit{ficheiro configuração} para autenticar os usuários. Este ficheiro deve conter ao menos informações do perfil de 1 administrador, para que este possa acessar o sistema e criar os demais usuários. O acesso do administrador ao sistema é feito por meio de uma conexão  \textit{UDP} ao servidor, utilizando o comando \textit{netcat}. Para ter acesso liberado as funcionalidades disponíveis o administrador deve realizar login com os dados de um usuário cadastrado no \textit{ficheiro configuração}.
+
+Usuários com perfil de professor e aluno devem acessar o sistema através do cliente desenvolvido. Para executar o cliente é utilizado o comando definido pelo professor:
+
+\begin{verbatim}
+    class_client {endereço do servidor} {PORTO_TURMAS}
+\end{verbatim}
+
+Estes usuários com perfil de professor podem realizar o envio de conteúdos para os alunos. Este compartilhamento é feito por meio de \textit{Multicast}. Para isso, a cada turma criada é atribuído um endereço \textit{Multicast}. Sendo assim, sempre que um professor deseja compartilhar um novo conteúdo precisa apenas informar o nome da turma, e o conteúdo que deseja enviar. O envio deste conteúdo para os alunos é feito pelo servidor.
+
+O servidor ao receber a mensagem do tipo \textit{SEND} verifica se o cliente que enviou a requisição é um usuário autenticado com perfil de professor. Caso o cliente esteja autenticado corretamente, o servidor busca a turma em um local da memória compartilhada nomeado \textit{/classes}. Encontrando a turma desejada, o servidor inicia uma comunicação via \textit{socket Multicast} com o \textit{TTL} superior a 2, para garantir que a mensagem seja entregue a todos os dispositivos da rede configurada. Após emitir a mensagem desejada por este socket a conexão é encerrada.
+
+Como citado acima, os dados referentes as turmas são armazenados pelo servidor em uma area de memória compartilhada, pois estes dados deve ser acessados por múltiplos processos. Cada cliente que deseja se comunicar como servidor realiza uma conexão \textit{TCP}, e o servidor passa a ouvir os comandos enviados em uma nova thread. Assim, as requisições de cada cliente é processada por uma thread nova no servidor. Então, para que a mesma turma criada pelo professor seja acessada por alunos este dado é armazenado em memória compartilhada.
+
+% \section{Estrutura do Servidor}
+
+Os processos realizados pelo servidor estão separados em duas grandes áreas no programa. As funcionalidades estão isolados conforme o protocolo utilizado, sendo assim, as funcionalidades de administrador acessadas via \textit{UDP} estão isoladas das demais que são acessadas via \textit{TCP}. Ao iniciar o servidor, dois processos são inicializados para lidar isoladamente com estas funcionalidades. Para isso, as funções de administração estão localizadas no ficheiro \(admin.c\), e tanto funções de alunos e professores  estão localizadas no ficheiro \(class.c\).
+
+Destaca-se que, por conta da arquitetura criada para o projeto, o login é realizado por duas funções. A autenticação de administradores é feita separadamente da dos demais usuários. Com isso, é garantido que os administradores não podem acessar o sistema via \textit{TCP}, e alunos e professores não acessam via \textit{UDP}.
+
+% As funcionalidades descritas anteriormente são realizadas por um servidor desenvolvido. Assim, os usuários precisam se comunicar com o servidor para poder acessar o sistema. Usuários com perfil de administrador acessam o sistema diretamente por meio do comando \textit{netcat}. 
+
+% Como o administrador pode acessar as suas funções
+% Como é feito o envio do conteúdo? O servidor envia
+
+
+
+% \section{Descrição do ambiente GNS3}
+% Os seguintes comandos foram utilizados para configurar o projeto GNS3. Foi também criada uma imagens docker nomeada 'project-server', a partir do arquivo Dockerfile que se encontra no diretório 'servidor'
+
+% O servidor envia o conteúdo adicionado pelo professor para o multicast da turma.
+
+
+%-----------------------------------------------------------------------
+
+
+\end{document}
