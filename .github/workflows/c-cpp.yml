@@ -15,6 +15,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: textbook/git-checkout-submodule-action@master
+    - name: Checkout Git Submodules
+      run: git submodule update --init --recursive
     - name: Compilation
       run: make --jobs=4 --output-sync=target
