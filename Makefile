@@ -366,7 +366,7 @@ $(OBJ_DIR)/%.c.o: %.c $(HEADERS)
 	@printf "########################\n"
 	@printf "\033[0m\n"
 	mkdir --parents "$$(dirname "$@")"
-	$(CC) $(CFLAGS) -c -o $@ $< -lrt
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(OBJ_DIR)/%.cpp.o: %.cpp $(HEADERS)
 	@printf "\n\033[31m"
@@ -381,7 +381,7 @@ $(OBJ_DIR)/%.cpp.o: %.cpp $(HEADERS)
 
 _SOURCES = server tcp/socket tcp/server udp/socket udp/server command admin class debug utils
 class_server: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
-	$(CC) $(CFLAGS) -o $@ $^ -lrt
+	$(CC) $(CFLAGS) -o $@ $^ $(LINKS)
 
 _SOURCES = $(addprefix $(SRC_DIR)/, \
 	   client \
@@ -393,7 +393,7 @@ _SOURCES = $(addprefix $(SRC_DIR)/, \
 	   utils) \
 	   $(addprefix veCtor/src/, vector)
 class_client: $(_SOURCES:%=$(OBJ_DIR)/%.c.o)
-	$(CC) $(CFLAGS) -o $@ $^ -lrt
+	$(CC) $(CFLAGS) -o $@ $^ $(LINKS)
 
 # }}}
 
