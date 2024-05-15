@@ -10,7 +10,6 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <netinet/in.h>
-#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -259,8 +258,7 @@ void classListClassesCommand(const CliCommand cliCommand, char *response)
 		          ip,
 		          INET_ADDRSTRLEN);
 
-		if (classes_ptr[i].name != NULL
-		    && classes_ptr[i].name[0] != '\0') {
+		if (classes_ptr[i].name[0] != '\0') {
 			if (!isFirstClass) {
 				strcat(response, ", ");
 			}
