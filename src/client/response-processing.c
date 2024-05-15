@@ -20,26 +20,23 @@ void clientSubscribeResponseProcessing(const char *const response)
 {
 	char *cloneString = trim(strdup(response));
 	Vector args       = vectorStringSplit(cloneString, " ");
-	free(cloneString);
 
-	const char *const command = *(char **) vectorGet(&args, 0);
-	if (strncmp(command, REPLY_ACCEPTED, sizeof(REPLY_ACCEPTED)) != 0
-	    || args.size < 2) {
+	strtok(cloneString, " ");
+	char *ipMulticast = strtok(NULL, " ");
+
+	if (ipMulticast == NULL) {
 #ifdef DEBUG
 		fprintf(stderr, "COMMAND REJECTED\n");
 #endif
-		vectorClear(&args);
+		free(cloneString);
 		return;
 	}
 
 	pthread_t thread;
-	pthread_create(&thread,
-	               NULL,
-	               clientMultiCastThread,
-	               vectorGet(&args, 1));
+	pthread_create(&thread, NULL, clientMultiCastThread, ipMulticast);
 	pthread_join(thread, NULL);
 
-	vectorClear(&args);
+	free(cloneString);
 }
 void clientCreateClassResponseProcessing(const char *const response) {}
 void clientSendResponseProcessing(const char *const response) {}
