@@ -2,9 +2,7 @@
 
 # Variables - Repo Source Codde {{{
 
-ARCHIVE          = serviçonoticias-pl8-BernardoHaab-LuísGóis.zip
 ASSETS_DIR       = assets
-DOCS_DIR         = docs
 GNS3_DIR         = project-files
 GNS3_DOCKER_DIR := $(GNS3_DIR)/docker
 INCLUDE_DIR      = $(PWD)/include
@@ -35,6 +33,12 @@ endef
 
 # Variables - Documentation {{{
 
+ARCHIVE             = serviçonoticias-pl8-BernardoHaab-LuísGóis.zip
+DOCS_DIR            = docs
+INSTALLATION_MANUAL =
+PRESENTATION        =
+REPORT              = relatorio.pdf
+USER_MANUAL         =
 
 PANDOC_OPTS      := --resource-path=.:..:$(DOCS_DIR):$(ASSETS_DIR)
 PANDOC_THEME_DIR := $(PANDOC_DATA_DIR)/themes
@@ -348,6 +352,9 @@ $(PRESENTATIONS): %.pdf: $(DOCS_DIR)/%.md
 
 $(DOCUMENTS): %.pdf: $(DOCS_DIR)/%.md
 	pandoc $(PANDOC_OPTS) --output=$@ $<
+
+Relatorio-RC-Meta_2/main.pdf: Relatorio-RC-Meta_2/main.tex
+	env --chdir=Relatorio-RC-Meta_2 pdflatex main.tex
 
 archive: $(ARCHIVE)
 
