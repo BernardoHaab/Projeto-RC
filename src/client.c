@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
 int main(int argc, char **argv)
 {
@@ -168,15 +170,67 @@ char *clientCommandTypeToString(const ClientCommandType command)
 
 void *clientMultiCastThread(void *argument)
 {
-	const struct sockaddr_in multicastIP = *(struct sockaddr_in *) argument;
+	const char *const multicastIPString = (char *) argument;
 
-#ifdef DEBUG
-	char multicastIPString[INET_ADDRSTRLEN];
-	strncpy(multicastIPString,
-	        inet_ntoa(multicastIP.sin_addr),
-	        INET_ADDRSTRLEN);
+#ifndef DEBUG
 	printf("Thread starting for multicast IP: %s...\n", multicastIPString);
 #endif
+
+	pthread_exit(NULL);
+
+	int sock;
+	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+		perror("socket");
+		exit(1);
+	}
+
+	struct sockaddr_in addr = {0};
+	addr.sin_family         = AF_INET;
+	addr.sin_addr.s_addr    = inet_addr(multicastIPString);
+	addr.sin_port           = htons(5151);
+	if (bind(sock, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+		perror("bind: ");
+		pthread_exit(NULL);
+	}
+
+	struct ip_mreq mreq;
+	mreq.imr_multiaddr.s_addr = inet_addr(multicastIPString);
+	mreq.imr_interface.s_addr = INADDR_ANY;
+	if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq))
+	    < 0) {
+		perror("setsockopt: ");
+		pthread_exit(NULL);
+	}
+
+	int nbytes;
+	unsigned int addrlen;
+	char msg[256] = {0};
+	while (1) {
+		if ((nbytes = recvfrom(sock,
+		                       msg,
+		                       sizeof(msg) - 1,
+		                       0,
+		                       (struct sockaddr *) &addr,
+		                       &addrlen))
+		    < 0) {
+			perror("recvfrom: ");
+			pthread_exit(NULL);
+		}
+
+		printf("Received multicast message: %s\n", msg);
+	}
+
+	if (setsockopt(sock,
+	               IPPROTO_IP,
+	               IP_DROP_MEMBERSHIP,
+	               &mreq,
+	               sizeof(mreq))
+	    < 0) {
+		perror("setsockopt: ");
+		pthread_exit(NULL);
+	}
+	close(sock);
+
 
 	pthread_exit(NULL);
 }

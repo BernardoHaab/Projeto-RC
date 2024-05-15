@@ -32,16 +32,11 @@ void clientSubscribeResponseProcessing(const char *const response)
 		return;
 	}
 
-	const char *const multicastIP = *(char **) vectorGet(&args, 1);
-	struct sockaddr_in client;
-	struct sockaddr_in addr = {0};
-	addr.sin_family         = AF_INET;
-	addr.sin_addr.s_addr    = inet_addr(multicastIP);
-	// TODO: Correct Multicast Port
-	addr.sin_port           = htons(5151);
-
 	pthread_t thread;
-	pthread_create(&thread, NULL, clientMultiCastThread, &client);
+	pthread_create(&thread,
+	               NULL,
+	               clientMultiCastThread,
+	               vectorGet(&args, 1));
 	pthread_join(thread, NULL);
 
 	vectorClear(&args);
