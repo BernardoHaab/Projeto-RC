@@ -4,7 +4,23 @@
 #include "command.h"
 #include "tcp/socket.h"
 
-#define MOTD "Bem-vindo à turma\n"
+#include <stdbool.h>
+
+#define MOTD                            "Bem-vindo à turma\n"
+#define LOGIN_SUCESS_CLIENT             "OK\n"
+#define INVALID_USER_OR_PASSWORD_CLIENT "REJECTED\n"
+
+#define TEACHER_ROLE       "professor"
+#define STUDENT_ROLE       "aluno"
+#define CLASSES_OBJ_NAME   "/classes"
+#define MULTICAST_OBJ_NAME "/multicast"
+
+#define USERNAME_MAX_LENGTH       256
+#define USER_CSV_ENTRY_MAX_LENGTH (USERNAME_MAX_LENGTH) + 256
+#define CSV_DELIMITER             ";"
+#define CLIENT_LOGGED_MAX         10
+#define CLASS_MAX_SIZE            10
+#define MAX_CLASSES               10
 
 #define ROLE_ENUM           \
 	WRAPPER(GUEST, 0)   \
@@ -63,7 +79,34 @@ typedef enum {
 CLASS_COMMANDS
 #undef WRAPPER
 
+typedef struct LoggedClient {
+	struct sockaddr_in clientAddrs;
+	Role role;
+} LoggedClient;
+
+typedef struct Class {
+	char name[50];
+	struct sockaddr_in ipMulticast;
+	int maxStudents;
+	int currentStudents;
+	struct sockaddr_in students[CLASS_MAX_SIZE];
+} Class;
+
+
+ClassCommand processClassCommand(const CliCommand cliCommand,
+                                 const bool isLoggedIn,
+                                 char *responseBuffer,
+                                 const size_t responseBufferSize);
+bool isClientLogged(const struct sockaddr_in clientIP);
+bool isSameAddress(const struct sockaddr_in a, const struct sockaddr_in b);
+struct sockaddr_in createNewIpMultiCast();
+void resetClasses();
+void addClientLogin(struct LoggedClient *loggedClients,
+                    const size_t loggedClientsSize,
+                    const struct sockaddr_in clientIP,
+                    const Role role);
 void setupClass(TCPSocket *tcpSocket);
 void processClient(const TCPSocket clientTCPSocket);
+void getFormatedIp(struct sockaddr_in ip, char *buffer);
 
 #endif // !CLASS_H

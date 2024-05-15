@@ -2,9 +2,7 @@
 
 # Variables - Repo Source Codde {{{
 
-ARCHIVE          = serviçonoticias-pl8-BernardoHaab-LuísGóis.zip
 ASSETS_DIR       = assets
-DOCS_DIR         = docs
 GNS3_DIR         = project-files
 GNS3_DOCKER_DIR := $(GNS3_DIR)/docker
 INCLUDE_DIR      = $(PWD)/include
@@ -35,6 +33,12 @@ endef
 
 # Variables - Documentation {{{
 
+ARCHIVE             = serviçonoticias-pl8-BernardoHaab-LuísGóis.zip
+DOCS_DIR            = docs
+INSTALLATION_MANUAL =
+PRESENTATION        =
+REPORT              = relatorio.pdf
+USER_MANUAL         =
 
 PANDOC_OPTS      := --resource-path=.:..:$(DOCS_DIR):$(ASSETS_DIR)
 PANDOC_THEME_DIR := $(PANDOC_DATA_DIR)/themes
@@ -349,6 +353,9 @@ $(PRESENTATIONS): %.pdf: $(DOCS_DIR)/%.md
 $(DOCUMENTS): %.pdf: $(DOCS_DIR)/%.md
 	pandoc $(PANDOC_OPTS) --output=$@ $<
 
+Relatorio-RC-Meta_2/main.pdf: Relatorio-RC-Meta_2/main.tex
+	env --chdir=Relatorio-RC-Meta_2 pdflatex main.tex
+
 archive: $(ARCHIVE)
 
 .PHONY: $(ARCHIVE)
@@ -381,12 +388,12 @@ $(OBJ_DIR)/%.cpp.o: %.cpp $(HEADERS)
 
 _SOURCES = server tcp/socket tcp/server udp/socket udp/server command admin class debug utils
 class_server: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LINKS)
 
 _SOURCES = $(addprefix $(SRC_DIR)/, client tcp/socket tcp/client debug utils) \
 	   $(addprefix veCtor/src/, vector)
 class_client: $(_SOURCES:%=$(OBJ_DIR)/%.c.o)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LINKS)
 
 # }}}
 
