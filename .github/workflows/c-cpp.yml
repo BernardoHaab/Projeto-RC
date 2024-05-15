@@ -15,8 +15,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Install pandoc
-      run: sudo apt-get install -y pandoc
+    - name: Install pandoc and pdflatex
+      run: sudo apt-get install -y pandoc texlive-latex-base
     - name: Checkout Git Submodules
       run: git submodule update --init --recursive
     - name: Compilation
