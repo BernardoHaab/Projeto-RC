@@ -383,7 +383,14 @@ _SOURCES = server tcp/socket tcp/server udp/socket udp/server command admin clas
 class_server: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 	$(CC) $(CFLAGS) -o $@ $^
 
-_SOURCES = $(addprefix $(SRC_DIR)/, client tcp/socket tcp/client debug utils) \
+_SOURCES = $(addprefix $(SRC_DIR)/, \
+	   client \
+	   client/input-processing \
+	   client/response-processing \
+	   tcp/socket \
+	   tcp/client \
+	   debug \
+	   utils) \
 	   $(addprefix veCtor/src/, vector)
 class_client: $(_SOURCES:%=$(OBJ_DIR)/%.c.o)
 	$(CC) $(CFLAGS) -o $@ $^

@@ -56,6 +56,9 @@
 	       clientSendInputProcessing,              \
 	       clientSendResponseProcessing)
 
+#define REPLY_ACCEPTED "ACCEPTED"
+#define REPLY_REJECTED "REJECTED"
+
 typedef enum {
 #define CLIENT(ENUM,                \
                COMMAND,             \
@@ -72,9 +75,11 @@ typedef enum {
 ClientCommandType parseClientCommandType(const char *const string);
 char *clientCommandTypeToString(const ClientCommandType command);
 
-typedef struct {
+typedef struct ClientCommand {
 	ClientCommandType command;
 	Vector args;
+	void (*inputProcessing)(const struct ClientCommand command);
+	void (*responseProcessing)(const char *const response);
 } ClientCommand;
 
 #define CLIENT_COMMAND_FORMAT \
@@ -87,18 +92,19 @@ char *clientCommandToString(const ClientCommand command);
 ClientCommand parseClientCommand(const char *const string);
 void printClientCommand(FILE *file, const ClientCommand command);
 
-#define CLIENT(ENUM,                                          \
-               COMMAND,                                       \
-               USAGE,                                         \
-               ARGS_MIN,                                      \
-               ARGS_MAX,                                      \
-               INPUT_PROCESSING,                              \
-               RESPONSE_PROCESSING)                           \
-	void INPUT_PROCESSING(const ClientCommand command);   \
-	void RESPONSE_PROCESSING(const char *const response); \
-	CLIENT_COMMANDS
+#define CLIENT(ENUM,                                        \
+               COMMAND,                                     \
+               USAGE,                                       \
+               ARGS_MIN,                                    \
+               ARGS_MAX,                                    \
+               INPUT_PROCESSING,                            \
+               RESPONSE_PROCESSING)                         \
+	void INPUT_PROCESSING(const ClientCommand command); \
+	void RESPONSE_PROCESSING(const char *const response);
+CLIENT_COMMANDS
 #undef CLIENT
 
 void usage(const char *const programName);
+void *clientMultiCastThread(void *multicastIP);
 
 #endif // !CLIENT_H

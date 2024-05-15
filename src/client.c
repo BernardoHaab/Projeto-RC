@@ -7,7 +7,10 @@
 #include "utils.h"
 #include "vector.h"
 
+#include <arpa/inet.h>
 #include <bits/types/struct_iovec.h>
+#include <netinet/in.h>
+#include <pthread.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,11 +35,13 @@ int main(int argc, char **argv)
 	TCPSocket connectionTCPSocket
 	    = createConnectedTCPSocket(serverIPAddress, classPort);
 
+	readFromTCPSocket(&connectionTCPSocket);
+
 	loop
 	{
-		readFromTCPSocket(&connectionTCPSocket);
-
 		printf("%s\n", trim(connectionTCPSocket.buffer));
+
+		ClientCommand command = {0};
 
 		bool validCommand = false;
 		while (!validCommand) {
@@ -50,9 +55,8 @@ int main(int argc, char **argv)
 				exit(EXIT_FAILURE);
 			}
 
-			const ClientCommand command
+			command
 			    = parseClientCommand(connectionTCPSocket.buffer);
-			printClientCommand(stdout, command);
 
 			// TODO: Parse if the command is valid
 			validCommand = true;
@@ -65,6 +69,10 @@ int main(int argc, char **argv)
 		        BUFFER_SIZE);
 
 		writeToTCPSocket(&connectionTCPSocket);
+
+		readFromTCPSocket(&connectionTCPSocket);
+
+		command.responseProcessing(connectionTCPSocket.buffer);
 	}
 
 	closeTCPSocket(&connectionTCPSocket);
@@ -89,6 +97,22 @@ ClientCommand parseClientCommand(const char *const string)
 	command.args = vectorStringSplit(string, CLI_COMMAND_DELIMITER);
 	command.command
 	    = parseClientCommandType(*(char **) vectorGet(&command.args, 0));
+
+	switch (command.command) {
+#define CLIENT(ENUM,                                              \
+               COMMAND,                                           \
+               USAGE,                                             \
+               ARGS_MIN,                                          \
+               ARGS_MAX,                                          \
+               INPUT_PROCESSING,                                  \
+               RESPONSE_PROCESSING)                               \
+	case ENUM: {                                              \
+		command.inputProcessing    = INPUT_PROCESSING;    \
+		command.responseProcessing = RESPONSE_PROCESSING; \
+	} break;
+		CLIENT_COMMANDS
+#undef CLIENT
+	}
 
 	return command;
 }
@@ -140,4 +164,19 @@ char *clientCommandTypeToString(const ClientCommandType command)
 	}
 
 	return NULL;
+}
+
+void *clientMultiCastThread(void *argument)
+{
+	const struct sockaddr_in multicastIP = *(struct sockaddr_in *) argument;
+
+#ifdef DEBUG
+	char multicastIPString[INET_ADDRSTRLEN];
+	strncpy(multicastIPString,
+	        inet_ntoa(multicastIP.sin_addr),
+	        INET_ADDRSTRLEN);
+	printf("Thread starting for multicast IP: %s...\n", multicastIPString);
+#endif
+
+	pthread_exit(NULL);
 }
