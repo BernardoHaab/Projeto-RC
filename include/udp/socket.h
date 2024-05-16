@@ -16,5 +16,6 @@ UDPSocket receiveFromUDPSocket(UDPSocket *udpSocket);
 void closeUDPSocket(UDPSocket *udpSocket);
 void sendToUDPSocket(UDPSocket *udpSocket);
 void writeToUDPSocketBuffer(UDPSocket *udpSocket, const char *const string);
+void writeToUDPSocket(UDPSocket *udpSocket, const char *const string);
 
 #endif // !UDP_SOCKET_H

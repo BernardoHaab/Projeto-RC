@@ -51,3 +51,21 @@ void sendToUDPSocket(UDPSocket *udpSocket)
 		error("Error sendto");
 	}
 }
+
+void writeToUDPSocketBuffer(UDPSocket *udpSocket, const char *const string)
+{
+	if (string == NULL || string == udpSocket->buffer || *string == '\0') {
+		return;
+	}
+
+	strncpy(udpSocket->buffer, string, BUFFER_SIZE);
+}
+
+void writeToUDPSocket(UDPSocket *udpSocket, const char *const string)
+{
+	writeToUDPSocketBuffer(udpSocket, string);
+
+	write(udpSocket->fileDescriptor,
+	      udpSocket->buffer,
+	      strnlen(udpSocket->buffer, BUFFER_SIZE));
+}
