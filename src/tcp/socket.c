@@ -37,7 +37,7 @@ ssize_t readFromTCPSocket(TCPSocket *connectingTCPSocket)
 	                             BUFFER_SIZE);
 
 	if (receivedBytes < 0) {
-		error("");
+		error("read: ");
 	}
 
 	connectingTCPSocket->buffer[receivedBytes] = '\0';
