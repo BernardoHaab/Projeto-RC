@@ -1,0 +1,21 @@
+name: Pandoc/Latex CI
+
+on:
+  push:
+    branches:
+      - "main"
+      - "**"
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: pandoc/latex
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Compile Latex
+      run: make Relatorio-RC-Meta_2/main.pdf
+    - name: Compile Markdown
+      run: make relatorio.pdf
