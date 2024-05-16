@@ -35,7 +35,7 @@ void clientSubscribeResponseProcessing(const char *const response)
 	pthread_create(&thread, NULL, clientMultiCastThread, ipMulticast);
 	pthread_join(thread, NULL);
 
-	free(cloneString);
+//	free(cloneString);
 }
 void clientCreateClassResponseProcessing(const char *const response) {}
 void clientSendResponseProcessing(const char *const response) {}

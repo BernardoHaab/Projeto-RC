@@ -79,7 +79,7 @@ GITIGNORE += $(VENV)
 CC     = gcc
 CCP    = g++
 CFLAGS = -Wall -Wextra -Werror
-LINKS  =
+LINKS  = -lrt -pthread
 
 CFLAGS += -Wno-error=unused-parameter
 CFLAGS += -Wno-error=unused-variable

@@ -176,7 +176,7 @@ void *clientMultiCastThread(void *argument)
 	printf("Thread starting for multicast IP: %s...\n", multicastIPString);
 #endif
 
-	pthread_exit(NULL);
+//	pthread_exit(NULL);
 
 	int sock;
 	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -187,7 +187,7 @@ void *clientMultiCastThread(void *argument)
 	struct sockaddr_in addr = {0};
 	addr.sin_family         = AF_INET;
 	addr.sin_addr.s_addr    = inet_addr(multicastIPString);
-	addr.sin_port           = htons(5151);
+	addr.sin_port           = htons(5000);
 	if (bind(sock, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
 		perror("bind: ");
 		pthread_exit(NULL);
@@ -206,6 +206,7 @@ void *clientMultiCastThread(void *argument)
 	unsigned int addrlen;
 	char msg[256] = {0};
 	while (1) {
+		memset(msg, 0, sizeof(msg)-1);
 		if ((nbytes = recvfrom(sock,
 		                       msg,
 		                       sizeof(msg) - 1,
