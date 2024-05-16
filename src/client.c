@@ -64,13 +64,9 @@ int main(int argc, char **argv)
 			validCommand = true;
 		}
 
+		strcat(connectionTCPSocket.buffer, "\n");
 
-		strncpy(connectionTCPSocket.buffer
-		            + strnlen(connectionTCPSocket.buffer, BUFFER_SIZE),
-		        "\n",
-		        BUFFER_SIZE);
-
-		writeToTCPSocket(&connectionTCPSocket);
+		writeToTCPSocket(&connectionTCPSocket, NULL);
 
 		readFromTCPSocket(&connectionTCPSocket);
 

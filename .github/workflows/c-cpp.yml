@@ -15,9 +15,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Install pandoc and pdflatex
-      run: sudo apt-get install -y pandoc texlive-latex-base texlive-latex-extra texlive-latex-recommended
     - name: Checkout Git Submodules
       run: git submodule update --init --recursive
     - name: Compilation
-      run: make --jobs=4 --output-sync=target
+      run: make --jobs=4 --output-sync=target class_server class_client

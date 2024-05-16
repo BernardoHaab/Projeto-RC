@@ -8,25 +8,21 @@
 
 void parseCliCommand(const char *const string, CliCommand *cliCommand)
 {
-	char *newString = trim(
-	    strcpy(malloc(sizeof(string[0]) * strlen(string) + 1), string));
+	char *cloneString = trim(strdup(string));
 
 	destroyCliCommand(cliCommand);
 
-	for (char *token = strtok(newString, CLI_COMMAND_DELIMITER);
+	for (char *token = strtok(cloneString, CLI_COMMAND_DELIMITER);
 	     token != NULL;
 	     token = strtok(NULL, CLI_COMMAND_DELIMITER)) {
 		cliCommand->args = realloc(cliCommand->args,
 		                           sizeof(cliCommand->args[0])
 		                               * ++cliCommand->nargs);
 
-		const size_t tokenSize = strlen(token) + 1;
-		cliCommand->args[cliCommand->nargs - 1]
-		    = strcpy(malloc(sizeof(cliCommand->args[0][0]) * tokenSize),
-		             token);
+		cliCommand->args[cliCommand->nargs - 1] = strdup(token);
 	}
 
-	free(newString);
+	free(cloneString);
 }
 
 CliCommand parseCliCommandCopy(const char *const string)
