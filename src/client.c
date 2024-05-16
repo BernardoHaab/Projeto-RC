@@ -43,12 +43,9 @@ int main(int argc, char **argv)
 			break;
 		}
 
-		strncpy(connectionTCPSocket.buffer
-		            + strnlen(connectionTCPSocket.buffer, BUFFER_SIZE),
-		        "\n",
-		        BUFFER_SIZE);
+		strcat(connectionTCPSocket.buffer, "\n");
 
-		writeToTCPSocket(&connectionTCPSocket);
+		writeToTCPSocket(&connectionTCPSocket, NULL);
 	}
 
 	closeTCPSocket(&connectionTCPSocket);

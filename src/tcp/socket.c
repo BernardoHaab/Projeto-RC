@@ -47,11 +47,17 @@ ssize_t readFromTCPSocket(TCPSocket *connectingTCPSocket)
 
 void writeToTCPSocketBuffer(TCPSocket *tcpSocket, const char *const string)
 {
+	if (string == NULL || string == tcpSocket->buffer || *string == '\0') {
+		return;
+	}
+
 	strncpy(tcpSocket->buffer, string, BUFFER_SIZE);
 }
 
-void writeToTCPSocket(TCPSocket *tcpSocket)
+void writeToTCPSocket(TCPSocket *tcpSocket, const char *const string)
 {
+	writeToTCPSocketBuffer(tcpSocket, string);
+
 	write(tcpSocket->fileDescriptor,
 	      tcpSocket->buffer,
 	      strnlen(tcpSocket->buffer, BUFFER_SIZE));
