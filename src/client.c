@@ -1,9 +1,9 @@
 #include "client.h"
 
+#include "ansi.h"
 #include "command.h"
 #include "tcp/client.h"
 #include "tcp/socket.h"
-#include "udp/socket.h"
 #include "utils.h"
 #include "vector.h"
 
@@ -37,13 +37,16 @@ int main(int argc, char **argv)
 	TCPSocket connectionTCPSocket
 	    = createConnectedTCPSocket(serverIPAddress, classPort);
 
-	readFromTCPSocket(&connectionTCPSocket);
-
+	ClientCommand command = {0};
 	loop
 	{
-		printf("%s\n", trim(connectionTCPSocket.buffer));
+		readFromTCPSocket(&connectionTCPSocket);
 
-		ClientCommand command = {0};
+		if (command.responseProcessing != NULL) {
+			command.responseProcessing(connectionTCPSocket.buffer);
+		}
+
+		printf("%s\n", trim(connectionTCPSocket.buffer));
 
 		bool validCommand = false;
 		while (!validCommand) {
@@ -61,16 +64,17 @@ int main(int argc, char **argv)
 			    = parseClientCommand(connectionTCPSocket.buffer);
 
 			// TODO: Parse if the command is valid
+			if (command.command == CLIENT_HELP) {
+				command.inputProcessing(command);
+				continue;
+			}
+
 			validCommand = true;
 		}
 
 		strcat(connectionTCPSocket.buffer, "\n");
 
 		writeToTCPSocket(&connectionTCPSocket, NULL);
-
-		readFromTCPSocket(&connectionTCPSocket);
-
-		command.responseProcessing(connectionTCPSocket.buffer);
 	}
 
 	closeTCPSocket(&connectionTCPSocket);
