@@ -60,8 +60,7 @@ void setupClass(TCPSocket *serverTCPSocket)
 
 void processClient(TCPSocket clientTCPSocket)
 {
-	writeToTCPSocketBuffer(&clientTCPSocket, MOTD);
-	writeToTCPSocket(&clientTCPSocket);
+	writeToTCPSocket(&clientTCPSocket, MOTD);
 
 	CliCommand cliCommand = {0};
 
@@ -94,7 +93,7 @@ void processClient(TCPSocket clientTCPSocket)
 		                    clientTCPSocket.buffer,
 		                    BUFFER_SIZE);
 
-		writeToTCPSocket(&clientTCPSocket);
+		writeToTCPSocket(&clientTCPSocket, NULL);
 	} while (true);
 }
 
