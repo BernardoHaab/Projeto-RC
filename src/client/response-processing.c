@@ -15,28 +15,19 @@ void clientHelpResponseProcessing(const char *const response) {}
 void clientLoginResponseProcessing(const char *const response) {}
 void clientListClassesResponseProcessing(const char *const response) {}
 void clientListSubscribedResponseProcessing(const char *const response) {}
+
 void clientSubscribeResponseProcessing(const char *const response)
 {
 	char *cloneString = trim(strdup(response));
 	Vector args       = vectorStringSplit(cloneString, " ");
-
-	strtok(cloneString, " ");
-	char *ipMulticast = strtok(NULL, " ");
-
-	if (ipMulticast == NULL) {
-#ifdef DEBUG
-		fprintf(stderr, "COMMAND REJECTED\n");
-#endif
-		free(cloneString);
-		return;
-	}
+	free(cloneString);
 
 	pthread_t thread;
-	pthread_create(&thread, NULL, clientMultiCastThread, ipMulticast);
-//	pthread_join(thread, NULL);
-
-
-//	free(cloneString);
+	pthread_create(&thread,
+	               NULL,
+	               clientMultiCastThread,
+	               *(char **) vectorGet(&args, 1));
 }
+
 void clientCreateClassResponseProcessing(const char *const response) {}
 void clientSendResponseProcessing(const char *const response) {}
