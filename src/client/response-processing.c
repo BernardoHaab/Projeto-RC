@@ -6,10 +6,14 @@
 #include <bits/pthreadtypes.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <unistd.h>
+
+extern sem_t promptSemaphore;
 
 void clientHelpResponseProcessing(const char *const response) {}
 void clientLoginResponseProcessing(const char *const response) {}
@@ -23,6 +27,7 @@ void clientSubscribeResponseProcessing(const char *const response)
 	free(cloneString);
 
 	pthread_t thread;
+	sem_wait(&promptSemaphore);
 	pthread_create(&thread,
 	               NULL,
 	               clientMultiCastThread,
