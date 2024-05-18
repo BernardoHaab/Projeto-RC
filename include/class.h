@@ -6,12 +6,10 @@
 
 #include <stdbool.h>
 
-#define MOTD                            "Bem-vindo à turma\n"
-#define LOGIN_SUCESS_CLIENT             "OK\n"
-#define INVALID_USER_OR_PASSWORD_CLIENT "REJECTED\n"
+#define MOTD                            "Bem-vindo à turma"
+#define LOGIN_SUCESS_CLIENT             "OK"
+#define INVALID_USER_OR_PASSWORD_CLIENT "REJECTED"
 
-#define TEACHER_ROLE       "professor"
-#define STUDENT_ROLE       "aluno"
 #define CLASSES_OBJ_NAME   "/classes"
 #define MULTICAST_OBJ_NAME "/multicast"
 
@@ -22,70 +20,13 @@
 #define CLASS_MAX_SIZE            10
 #define MAX_CLASSES               10
 
-#define ROLE_ENUM           \
-	WRAPPER(GUEST, 0)   \
-	WRAPPER(STUDENT, 1) \
-	WRAPPER(TEACHER, 2)
-
-typedef enum {
-#define WRAPPER(ENUM, BIT_SHIFT) ENUM = 1 << BIT_SHIFT,
-	ROLE_ENUM
-#undef WRAPPER
-
-	    ALL
-	= 0
-#define WRAPPER(ENUM, BIT_SHIFT) | ENUM
-	ROLE_ENUM
-#undef WRAPPER
-	,
-} Role;
-
-#define CLASS_NOT_LOGGED_IN_COMMANDS                          \
-	WRAPPER(CLASS_HELP, "help", "help", classHelpCommand) \
-	WRAPPER(CLASS_LOGIN,                                  \
-	        "LOGIN",                                      \
-	        "LOGIN <username> <password>",                \
-	        classLoginCommand)
-#define CLASS_LOGGED_IN_COMMANDS              \
-	WRAPPER(CLASS_LIST_CLASSES,           \
-	        "LIST_CLASSES",               \
-	        "LIST_CLASSES",               \
-	        classListClassesCommand)      \
-	WRAPPER(CLASS_LIST_SUBSCRIBED,        \
-	        "LIST_SUBSCRIBED",            \
-	        "LIST_SUBSCRIBED",            \
-	        classListSubscribedCommand)   \
-	WRAPPER(CLASS_SUBSCRIBE_CLASS,        \
-	        "SUBSCRIBE_CLASS",            \
-	        "SUBSCRIBE_CLASS <class>",    \
-	        classSubscribeClassCommand)   \
-	WRAPPER(CLASS_CREATE_CLASS,           \
-	        "CREATE_CLASS",               \
-	        "CREATE_CLASS <name> <size>", \
-	        classCreateClassCommand)      \
-	WRAPPER(CLASS_SEND, "SEND", "SEND <class> <text>", classSendCommand)
-#define CLASS_COMMANDS               \
-	CLASS_NOT_LOGGED_IN_COMMANDS \
-	CLASS_LOGGED_IN_COMMANDS
-
-typedef enum {
-#define WRAPPER(ENUM, COMMAND, USAGE, FUNCTION) ENUM,
-	CLASS_COMMANDS
-#undef WRAPPER
-} ClassCommand;
-
-#define WRAPPER(ENUM, COMMAND, USAGE, FUNCTION) \
-	void FUNCTION(const CliCommand cliCommand, char *response);
-CLASS_COMMANDS
-#undef WRAPPER
-
 typedef struct LoggedClient {
-	struct sockaddr_in clientAddrs;
+	struct sockaddr_in address;
 	Role role;
 } LoggedClient;
 
-typedef struct Class {
-	char name[50];
+typedef struct {
+	char name[USERNAME_MAX_LENGTH + 1];
 	struct sockaddr_in ipMulticast;
 	int maxStudents;
 	int currentStudents;
@@ -93,20 +34,20 @@ typedef struct Class {
 } Class;
 
 
-ClassCommand processClassCommand(const CliCommand cliCommand,
-                                 const bool isLoggedIn,
-                                 char *responseBuffer,
-                                 const size_t responseBufferSize);
-bool isClientLogged(const struct sockaddr_in clientIP);
+/* ClassCommand processClassCommand(const CliCommand cliCommand, */
+/*                                  const bool isLoggedIn, */
+/*                                  char *responseBuffer, */
+/*                                  const size_t responseBufferSize); */
+bool isClientLogged(const Vector loggedClients,
+                    const struct sockaddr_in clientIP);
 bool isSameAddress(const struct sockaddr_in a, const struct sockaddr_in b);
 struct sockaddr_in createNewIpMultiCast();
 void resetClasses();
-void addClientLogin(struct LoggedClient *loggedClients,
-                    const size_t loggedClientsSize,
+void addClientLogin(Vector *loggedClients,
                     const struct sockaddr_in clientIP,
                     const Role role);
 void setupClass(TCPSocket *tcpSocket);
-void processClient(const TCPSocket clientTCPSocket);
+void processClient(TCPSocket clientTCPSocket);
 void getFormatedIp(struct sockaddr_in ip, char *buffer);
 
 #endif // !CLASS_H

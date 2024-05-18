@@ -113,8 +113,7 @@ const char *getUsageArgsFromConfigCommand(const ConfigCommandType command)
 	return NULL;
 }
 
-PreSendHookFunction
-getPreSendHookFromConfigCommand(const ConfigCommandType command)
+PreSendHookFunction getConfigPreSendHook(const ConfigCommandType command)
 {
 	switch (command) {
 #define COMMAND(ENUM,              \
@@ -133,8 +132,7 @@ getPreSendHookFromConfigCommand(const ConfigCommandType command)
 	return NULL;
 }
 
-PostReceiveHookFunction
-getPostReceiveHookFromConfigCommand(const ConfigCommandType command)
+PostReceiveHookFunction getConfigPostReceiveHook(const ConfigCommandType command)
 {
 	switch (command) {
 #define COMMAND(ENUM,              \
@@ -177,8 +175,8 @@ ConfigCommandOptional parseConfigCommand(const char *const string)
 		    .argsMax = getArgsMaxFromConfigCommandType(commandType),
 		    .argsMin = getArgsMinFromConfigCommandType(commandType),
 		    .usageArgs = (char *) getUsageArgsFromConfigCommand(commandType),
-		    .preSendHook = getPreSendHookFromConfigCommand(commandType),
-		    .postReceiveHook = getPostReceiveHookFromConfigCommand(commandType),
+		    .preSendHook = getConfigPreSendHook(commandType),
+		    .postReceiveHook = getConfigPostReceiveHook(commandType),
 	    },
 	};
 

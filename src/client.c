@@ -1,10 +1,10 @@
 #include "client.h"
 
-#include "command.h"
+#include "command/class.h"
+#include "command/client.h"
 #include "tcp/client.h"
 #include "tcp/socket.h"
 #include "utils.h"
-#include "vector.h"
 
 #include <arpa/inet.h>
 #include <bits/types/struct_iovec.h>
@@ -44,18 +44,17 @@ int main(int argc, char **argv)
 	TCPSocket connectionTCPSocket
 	    = createConnectedTCPSocket(serverIPAddress, classPort);
 
-	ClientCommand command = {0};
+	ClassCommandOptional commandOpt = {0};
 	loop
 	{
 		readFromTCPSocket(&connectionTCPSocket);
 
-		if (command.responseProcessing != NULL) {
-			command.responseProcessing(connectionTCPSocket.buffer);
+		if (commandOpt.command.postReceiveHook != NULL) {
+			commandOpt.command.postReceiveHook(connectionTCPSocket);
 		}
 
-		printf("%s\n", trim(connectionTCPSocket.buffer));
-
-		bool validCommand = false;
+		bool validCommand    = false;
+		ClassCommand command = {0};
 		while (!validCommand) {
 			sem_wait(&promptSemaphore);
 			printf(PROMPT);
@@ -69,19 +68,24 @@ int main(int argc, char **argv)
 			}
 			sem_post(&promptSemaphore);
 
-			command
+			commandOpt
 			    = parseClientCommand(connectionTCPSocket.buffer);
+			if (!commandOpt.valid) {
+				continue;
+			}
 
-			// TODO: Parse if the command is valid
-			if (command.command == CLIENT_HELP) {
-				command.inputProcessing(command);
+			command = commandOpt.command;
+
+			if (command.command == COMMAND_HELP) {
+				command.preSendHook(commandOpt.command,
+				                    &connectionTCPSocket);
 				continue;
 			}
 
 			validCommand = true;
 		}
 
-		strcat(connectionTCPSocket.buffer, "\n");
+		command.preSendHook(commandOpt.command, &connectionTCPSocket);
 
 		writeToTCPSocket(&connectionTCPSocket, NULL);
 	}
@@ -101,82 +105,6 @@ void usage(const char *const programName)
 	printf("  -h, --help                   Print this usage message\n");
 
 	exit(EXIT_FAILURE);
-}
-
-ClientCommand parseClientCommand(const char *const string)
-{
-	ClientCommand command = {0};
-
-	command.args = vectorStringSplit(string, CLI_COMMAND_DELIMITER);
-	command.command
-	    = parseClientCommandType(*(char **) vectorGet(&command.args, 0));
-
-	switch (command.command) {
-#define CLIENT(ENUM,                                              \
-               COMMAND,                                           \
-               USAGE,                                             \
-               ARGS_MIN,                                          \
-               ARGS_MAX,                                          \
-               INPUT_PROCESSING,                                  \
-               RESPONSE_PROCESSING)                               \
-	case ENUM: {                                              \
-		command.inputProcessing    = INPUT_PROCESSING;    \
-		command.responseProcessing = RESPONSE_PROCESSING; \
-	} break;
-		CLIENT_COMMANDS
-#undef CLIENT
-	}
-
-	return command;
-}
-
-void printClientCommand(FILE *file, const ClientCommand command)
-{
-	fprintf(file,
-	        CLIENT_COMMAND_FORMAT "\n",
-	        clientCommandTypeToString(command.command),
-	        vectorString(command.args));
-}
-
-ClientCommandType parseClientCommandType(const char *const string)
-{
-	if (string == NULL || *string == '\0') {
-		return CLIENT_HELP;
-	}
-
-#define CLIENT(ENUM,                         \
-               COMMAND,                      \
-               USAGE,                        \
-               ARGS_MIN,                     \
-               ARGS_MAX,                     \
-               INPUT_PROCESSING,             \
-               RESPONSE_PROCESSING)          \
-	if (strcmp(string, #COMMAND) == 0) { \
-		return ENUM;                 \
-	}
-	CLIENT_COMMANDS
-#undef CLIENT
-
-	return CLIENT_HELP;
-}
-
-char *clientCommandTypeToString(const ClientCommandType command)
-{
-	switch (command) {
-#define CLIENT(ENUM,                \
-               COMMAND,             \
-               USAGE,               \
-               ARGS_MIN,            \
-               ARGS_MAX,            \
-               INPUT_PROCESSING,    \
-               RESPONSE_PROCESSING) \
-	case ENUM:                  \
-		return #ENUM;
-		CLIENT_COMMANDS
-#undef CLIENT
-	}
-
-	return NULL;
 }
 
 void *clientMultiCastThread(void *argument)

@@ -392,6 +392,8 @@ _SOURCES = \
 	   class \
 	   command \
 	   command/class \
+	   command/class/pre-send-hook \
+	   command/class/post-received-hook \
 	   command/config \
 	   command/config/pre-send-hook \
 	   command/config/post-received-hook \
@@ -408,7 +410,9 @@ class_server: $(_SOURCES:%=$(OBJ_DIR)/%.c.o)
 
 _SOURCES = $(addprefix $(SRC_DIR)/, \
 	   client \
-	   command/class \
+	   command/client \
+	   command/client/pre-send-hook \
+	   command/client/post-received-hook \
 	   debug \
 	   tcp/client \
 	   tcp/socket \

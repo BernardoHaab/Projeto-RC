@@ -19,20 +19,6 @@ void clientHelpResponseProcessing(const char *const response) {}
 void clientLoginResponseProcessing(const char *const response) {}
 void clientListClassesResponseProcessing(const char *const response) {}
 void clientListSubscribedResponseProcessing(const char *const response) {}
-
-void clientSubscribeResponseProcessing(const char *const response)
-{
-	char *cloneString = trim(strdup(response));
-	Vector args       = vectorStringSplit(cloneString, " ");
-	free(cloneString);
-
-	pthread_t thread;
-	sem_wait(&promptSemaphore);
-	pthread_create(&thread,
-	               NULL,
-	               clientMultiCastThread,
-	               *(char **) vectorGet(&args, 1));
-}
-
+void clientSubscribeResponseProcessing(const char *const response) {}
 void clientCreateClassResponseProcessing(const char *const response) {}
 void clientSendResponseProcessing(const char *const response) {}

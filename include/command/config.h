@@ -90,10 +90,9 @@ typedef struct ConfigCommand {
 typedef void (*PreSendHookFunction)(const ConfigCommand command,
                                     UDPSocket *socket);
 typedef void (*PostReceiveHookFunction)(const char *const response);
-PreSendHookFunction
-getPreSendHookFromConfigCommand(const ConfigCommandType command);
+PreSendHookFunction getConfigPreSendHook(const ConfigCommandType command);
 PostReceiveHookFunction
-getPostReceiveHookFromConfigCommand(const ConfigCommandType command);
+getConfigPostReceiveHook(const ConfigCommandType command);
 
 #define CONFIG_COMMAND_FORMAT \
 	"{\n"                 \

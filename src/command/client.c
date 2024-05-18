@@ -1,7 +1,8 @@
-#include "command/class.h"
+#include "command/client.h"
 
 #include "command.h"
-#include "command/class/hooks.h"
+#include "command/class.h"
+#include "command/client/hooks.h"
 #include "vector.h"
 
 #include <assert.h>
@@ -11,13 +12,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *classCommandTypeToString(const ClassCommandType command)
+char *classCommandTypeToString(const ClientCommandType command)
 {
 	assert(0 && "classCommandTypeToString Not implemented yet");
 	return NULL;
 }
 
-ClassCommandType parseClassCommandType(const char *const string)
+ClientCommandType parseClientCommandType(const char *const string)
 {
 	if (string == NULL || *string == '\0') {
 		return COMMAND_HELP;
@@ -34,7 +35,7 @@ ClassCommandType parseClassCommandType(const char *const string)
 	if (strcmp(string, #BASE_COMMAND) == 0) { \
 		return ENUM;                      \
 	}
-	CLASS_COMMANDS
+	CLIENT_COMMANDS
 #undef COMMAND
 
 	// TODO: assert(0 && "Unknown command type");
@@ -42,7 +43,7 @@ ClassCommandType parseClassCommandType(const char *const string)
 	return COMMAND_HELP;
 }
 
-int getClassCommandArgsMax(const ClassCommandType command)
+int getClientCommandArgsMax(const ClientCommandType command)
 {
 	switch (command) {
 #define COMMAND(ENUM,                      \
@@ -55,7 +56,7 @@ int getClassCommandArgsMax(const ClassCommandType command)
                 POST_RECEIVED_HOOK_SUFFIX) \
 	case ENUM:                         \
 		return ARGS_MAX;
-		CLASS_COMMANDS
+		CLIENT_COMMANDS
 #undef COMMAND
 	}
 
@@ -64,7 +65,7 @@ int getClassCommandArgsMax(const ClassCommandType command)
 	return 0;
 }
 
-int getClassCommandArgsMin(const ClassCommandType command)
+int getClientCommandArgsMin(const ClientCommandType command)
 {
 	switch (command) {
 #define COMMAND(ENUM,                      \
@@ -77,7 +78,7 @@ int getClassCommandArgsMin(const ClassCommandType command)
                 POST_RECEIVED_HOOK_SUFFIX) \
 	case ENUM:                         \
 		return ARGS_MIN;
-		CLASS_COMMANDS
+		CLIENT_COMMANDS
 #undef COMMAND
 	}
 
@@ -86,7 +87,7 @@ int getClassCommandArgsMin(const ClassCommandType command)
 	return 0;
 }
 
-Role getClassCommandRole(const ClassCommandType command)
+Role getClientCommandRole(const ClientCommandType command)
 {
 	switch (command) {
 #define COMMAND(ENUM,                      \
@@ -99,7 +100,7 @@ Role getClassCommandRole(const ClassCommandType command)
                 POST_RECEIVED_HOOK_SUFFIX) \
 	case ENUM:                         \
 		return ROLE;
-		CLASS_COMMANDS
+		CLIENT_COMMANDS
 #undef COMMAND
 	}
 
@@ -108,7 +109,7 @@ Role getClassCommandRole(const ClassCommandType command)
 	return ROLE_GUEST;
 }
 
-const char *getClassCommandUsageArgs(const ClassCommandType command)
+const char *getClientCommandUsageArgs(const ClientCommandType command)
 {
 	switch (command) {
 #define COMMAND(ENUM,                      \
@@ -121,7 +122,7 @@ const char *getClassCommandUsageArgs(const ClassCommandType command)
                 POST_RECEIVED_HOOK_SUFFIX) \
 	case ENUM:                         \
 		return USAGE_ARGS;
-		CLASS_COMMANDS
+		CLIENT_COMMANDS
 #undef COMMAND
 	}
 
@@ -130,7 +131,7 @@ const char *getClassCommandUsageArgs(const ClassCommandType command)
 	return NULL;
 }
 
-PreSendHookFunction getClassPreSendHook(const ClassCommandType command)
+PreSendHookFunction getClassPreSendHook(const ClientCommandType command)
 {
 	switch (command) {
 #define COMMAND(ENUM,                      \
@@ -142,8 +143,8 @@ PreSendHookFunction getClassPreSendHook(const ClassCommandType command)
                 PRE_SEND_HOOK_SUFFIX,      \
                 POST_RECEIVED_HOOK_SUFFIX) \
 	case ENUM:                         \
-		return class##PRE_SEND_HOOK_SUFFIX;
-		CLASS_COMMANDS
+		return client##PRE_SEND_HOOK_SUFFIX;
+		CLIENT_COMMANDS
 #undef COMMAND
 	}
 
@@ -152,7 +153,7 @@ PreSendHookFunction getClassPreSendHook(const ClassCommandType command)
 	return NULL;
 }
 
-PostReceiveHookFunction getClassPostReceiveHook(const ClassCommandType command)
+PostReceiveHookFunction getClassPostReceiveHook(const ClientCommandType command)
 {
 	switch (command) {
 #define COMMAND(ENUM,                      \
@@ -164,8 +165,8 @@ PostReceiveHookFunction getClassPostReceiveHook(const ClassCommandType command)
                 PRE_SEND_HOOK_SUFFIX,      \
                 POST_RECEIVED_HOOK_SUFFIX) \
 	case ENUM:                         \
-		return class##POST_RECEIVED_HOOK_SUFFIX;
-		CLASS_COMMANDS
+		return client##POST_RECEIVED_HOOK_SUFFIX;
+		CLIENT_COMMANDS
 #undef COMMAND
 	}
 
@@ -174,9 +175,9 @@ PostReceiveHookFunction getClassPostReceiveHook(const ClassCommandType command)
 	return NULL;
 }
 
-ClassCommandOptional parseClassCommand(const char *const string)
+ClientCommandOptional parseClientCommand(const char *const string)
 {
-	static const ClassCommandOptional nullopt = {0};
+	static const ClientCommandOptional nullopt = {0};
 
 	if (string == NULL || *string == '\0') {
 		return nullopt;
@@ -184,18 +185,18 @@ ClassCommandOptional parseClassCommand(const char *const string)
 
 	Vector args = vectorStringSplit(string, COMMAND_DELIMITER);
 
-	const ClassCommandType baseCommand
-	    = parseClassCommandType(*(char **) vectorGet(&args, 0));
+	const ClientCommandType baseCommand
+	    = parseClientCommandType(*(char **) vectorGet(&args, 0));
 
-	const ClassCommandOptional command = {
+	const ClientCommandOptional command = {
 	    .valid   = true,
 	    .command = {
 		    .command = baseCommand,
 		    .args = args,
-		    .role = getClassCommandRole(baseCommand),
-		    .usageArgs = (char *) getClassCommandUsageArgs(baseCommand),
-		    .argsMin = getClassCommandArgsMin(baseCommand),
-		    .argsMax = getClassCommandArgsMax(baseCommand),
+		    .role = getClientCommandRole(baseCommand),
+		    .usageArgs = (char *) getClientCommandUsageArgs(baseCommand),
+		    .argsMin = getClientCommandArgsMin(baseCommand),
+		    .argsMax = getClientCommandArgsMax(baseCommand),
 		    .preSendHook = getClassPreSendHook(baseCommand),
 		    .postReceiveHook = getClassPostReceiveHook(baseCommand),
 	    },
@@ -204,7 +205,7 @@ ClassCommandOptional parseClassCommand(const char *const string)
 	return command;
 }
 
-void printClassCommand(FILE *file, const ClassCommand command)
+void printClientCommand(FILE *file, const ClientCommand command)
 {
 	fprintf(file,
 	        CLASS_COMMAND_FORMAT "\n",
@@ -212,7 +213,7 @@ void printClassCommand(FILE *file, const ClassCommand command)
 	        vectorString(command.args));
 }
 
-void *sprintClassCommand(char *string, const ClassCommand command)
+void *sprintClientCommand(char *string, const ClientCommand command)
 {
 	if (string == NULL) {
 		return NULL;
@@ -226,7 +227,7 @@ void *sprintClassCommand(char *string, const ClassCommand command)
 	return string;
 }
 
-void destroyClassCommand(ClassCommand *command)
+void destroyClientCommand(ClientCommand *command)
 {
 	vectorClear(&command->args);
 
