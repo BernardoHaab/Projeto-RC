@@ -19,7 +19,11 @@ TCPSocket createEmptyTCPSocket(void);
 
 ssize_t readFromTCPSocket(TCPSocket *tcpSocket);
 void closeTCPSocket(TCPSocket *tcpSocket);
+void clearTCPSocketBuffer(TCPSocket *tcpSocket);
 void writeToTCPSocketBuffer(TCPSocket *tcpSocket, const char *const string);
+void sprintfToTCPSocketBuffer(TCPSocket *tcpSocket,
+                              const char *const format,
+                              ...);
 void writeToTCPSocket(TCPSocket *tcpSocket, const char *const string);
 
 #endif // !TCP_SOCKET_H
