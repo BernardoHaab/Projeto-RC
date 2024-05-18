@@ -386,17 +386,32 @@ $(OBJ_DIR)/%.cpp.o: %.cpp $(HEADERS)
 
 # TODO: Add Parallel Compilation
 
-_SOURCES = server tcp/socket tcp/server udp/socket udp/server command admin class debug utils
-class_server: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+_SOURCES = \
+	   $(addprefix $(SRC_DIR)/, \
+	   admin \
+	   class \
+	   command \
+	   command/class \
+	   command/config \
+	   command/config/pre-send-hook \
+	   command/config/post-received-hook \
+	   debug \
+	   server \
+	   tcp/server \
+	   tcp/socket \
+	   udp/server \
+	   udp/socket \
+	   utils) \
+	   $(addprefix veCtor/src/, vector)
+class_server: $(_SOURCES:%=$(OBJ_DIR)/%.c.o)
 	$(CC) $(CFLAGS) -o $@ $^ $(LINKS)
 
 _SOURCES = $(addprefix $(SRC_DIR)/, \
 	   client \
-	   client/input-processing \
-	   client/response-processing \
-	   tcp/socket \
-	   tcp/client \
+	   command/class \
 	   debug \
+	   tcp/client \
+	   tcp/socket \
 	   utils) \
 	   $(addprefix veCtor/src/, vector)
 class_client: $(_SOURCES:%=$(OBJ_DIR)/%.c.o)

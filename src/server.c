@@ -20,9 +20,6 @@ int main(int argc, char **argv)
 {
 	char *ipAddress = SERVER_IP_DEFAULT;
 
-	pid_t wpid;
-	int status = 0;
-
 	for (int i = 0; i < argc; ++i) {
 		const char *const arg = argv[i];
 		if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0) {
