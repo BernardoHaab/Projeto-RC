@@ -3,6 +3,8 @@
 #include "debug.h"
 
 #include <netinet/in.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -52,13 +54,28 @@ void sendToUDPSocket(UDPSocket *udpSocket)
 	}
 }
 
+void clearUDPSocketBuffer(UDPSocket *udpSocket)
+{
+	writeToUDPSocketBuffer(udpSocket, "");
+}
+
 void writeToUDPSocketBuffer(UDPSocket *udpSocket, const char *const string)
 {
-	if (string == NULL || string == udpSocket->buffer || *string == '\0') {
+	if (string == NULL || string == udpSocket->buffer) {
 		return;
 	}
 
 	strncpy(udpSocket->buffer, string, BUFFER_SIZE);
+}
+
+void sprintfToUDPSocketBuffer(UDPSocket *udpSocket,
+                              const char *const format,
+                              ...)
+{
+	va_list args;
+	va_start(args, format);
+	vsnprintf(udpSocket->buffer, BUFFER_SIZE, format, args);
+	va_end(args);
 }
 
 void writeToUDPSocket(UDPSocket *udpSocket, const char *const string)
