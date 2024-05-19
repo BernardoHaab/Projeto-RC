@@ -25,7 +25,7 @@ UDPSocket receiveFromUDPSocket(UDPSocket *udpSocket)
 	                (struct sockaddr *) &clientUDPSocket.address,
 	                &clientIPAddressLength))
 	    < 0) {
-		error("Error receiving from UDP Socket!\n");
+		error("recvfrom: ");
 		return clientUDPSocket;
 	}
 

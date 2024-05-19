@@ -30,7 +30,7 @@ configDefaultPostReceiveHook(const UDPSocket socket)
 
 	if (!validNumberOfArgs(command.argsMin,
 	                       command.argsMax,
-	                       command.args.size)) {
+	                       command.args.size - 1)) {
 		return INVALID_POST_RECEIVE_HOOK_RESPONSE(
 		    "Invalid number of arguments");
 	}

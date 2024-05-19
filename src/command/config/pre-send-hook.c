@@ -109,9 +109,11 @@ void configAddUserPreSendHook(const ConfigCommand command, UDPSocket *socket)
 
 	// TODO: Move command integrity to postReceiveHook
 	if (command.args.size != 4) {
-		writeToUDPSocketBuffer(socket,
-		                       "Comando inválido. Tente: ADD_USER "
-		                       "<login> <password> <role>\n");
+		sprintfToUDPSocketBuffer(
+		    socket,
+		    "Comando inválido. Tente: %s %s\n",
+		    configCommandTypeToString(command.command),
+		    command.usageArgs);
 		return;
 	}
 
@@ -218,7 +220,8 @@ void configDeleteUserPreSendHook(const ConfigCommand command, UDPSocket *socket)
 	rename(TEMP_FILENAME, usersFilepath);
 
 	writeToUDPSocketBuffer(socket,
-	                       found ? USER_DELETED_SUCCESS : USER_NOT_FOUND);
+	                       found ? USER_DELETED_SUCCESS "\n"
+	                             : USER_NOT_FOUND "\n");
 }
 
 void configListUsersPreSendHook(const ConfigCommand command, UDPSocket *socket)

@@ -50,7 +50,7 @@ void setupAdminConsole(UDPSocket *serverUDPSocket)
 		printConfigCommand(stdout, command);
 
 		const PostReceiveHookResponse response
-		    = command.postReceiveHook(clientUDPSocket);
+		    = command.postReceiveHook(*serverUDPSocket);
 		if (!response.valid) {
 			destroyConfigCommand(&command);
 			debugMessage(stdout, ERROR, "%s\n", response.reason);
