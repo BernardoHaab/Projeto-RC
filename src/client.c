@@ -5,6 +5,7 @@
 #include "tcp/client.h"
 #include "tcp/socket.h"
 #include "utils.h"
+#include "vector.h"
 
 #include <arpa/inet.h>
 #include <bits/types/struct_iovec.h>
@@ -112,9 +113,20 @@ void usage(const char *const programName)
 
 void *clientMultiCastThread(void *argument)
 {
-	const char *const multicastIPString = (char *) argument;
+#define EXIT_THREAD(MESSAGE)                \
+	do {                                \
+		sem_post(&promptSemaphore); \
+		perror(MESSAGE);            \
+		vectorClear(args);          \
+		pthread_exit(NULL);         \
+	} while (0);
+
+	Vector *args = (Vector *) argument;
+
+	const char *const multicastIPString = *(char **) vectorGet(args, 1);
 
 #ifndef DEBUG
+	vectorPrint(stdout, *args);
 	printf("Thread starting for multicast IP: %s...\n", multicastIPString);
 #endif
 
@@ -124,9 +136,7 @@ void *clientMultiCastThread(void *argument)
 
 	int sock;
 	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-		sem_post(&promptSemaphore);
-		perror("socket");
-		pthread_exit(NULL);
+		EXIT_THREAD("socket: ");
 	}
 
 	struct sockaddr_in addr = {0};
@@ -134,9 +144,7 @@ void *clientMultiCastThread(void *argument)
 	addr.sin_addr.s_addr    = inet_addr(multicastIPString);
 	addr.sin_port           = htons(5000);
 	if (bind(sock, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
-		sem_post(&promptSemaphore);
-		perror("bind: ");
-		pthread_exit(NULL);
+		EXIT_THREAD("bind: ");
 	}
 
 	struct ip_mreq mreq;
@@ -144,9 +152,7 @@ void *clientMultiCastThread(void *argument)
 	mreq.imr_interface.s_addr = INADDR_ANY;
 	if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq))
 	    < 0) {
-		sem_post(&promptSemaphore);
-		perror("setsockopt: ");
-		pthread_exit(NULL);
+		EXIT_THREAD("setsockopt: ");
 	}
 
 	sem_post(&promptSemaphore);
@@ -163,9 +169,7 @@ void *clientMultiCastThread(void *argument)
 		                       (struct sockaddr *) &addr,
 		                       &addrlen))
 		    < 0) {
-			sem_post(&promptSemaphore);
-			perror("recvfrom: ");
-			pthread_exit(NULL);
+			EXIT_THREAD("recvfrom: ");
 		}
 
 		sem_wait(&promptSemaphore);
@@ -179,14 +183,14 @@ void *clientMultiCastThread(void *argument)
 	               &mreq,
 	               sizeof(mreq))
 	    < 0) {
-		sem_post(&promptSemaphore);
-		perror("setsockopt: ");
-		pthread_exit(NULL);
+		EXIT_THREAD("setsockopt: ");
 	}
 	close(sock);
 
 
+	vectorClear(args);
 	pthread_exit(NULL);
+#undef EXIT_THREAD
 }
 
 static void initializeSemaphore(void)

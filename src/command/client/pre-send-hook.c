@@ -46,16 +46,7 @@ void clientListSubscribedPreSendHook(const ClientCommand command,
 {}
 
 void clientSubscribePreSendHook(const ClientCommand command, TCPSocket *socket)
-{
-	Vector args = vectorStringSplit(socket->buffer, " ");
-
-	pthread_t thread;
-	sem_wait(&promptSemaphore);
-	pthread_create(&thread,
-	               NULL,
-	               clientMultiCastThread,
-	               *(char **) vectorGet(&args, 1));
-}
+{}
 
 void clientCreateClassPreSendHook(const ClientCommand command,
                                   TCPSocket *socket)
