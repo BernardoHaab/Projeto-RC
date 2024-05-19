@@ -13,8 +13,17 @@
 
 extern sem_t promptSemaphore;
 
+static void clientDefaultPreSendHook(const ClientCommand command,
+                                     TCPSocket *socket)
+{
+	(void) command;
+	(void) socket;
+}
+
 void clientHelpPreSendHook(const ClientCommand command, TCPSocket *socket)
 {
+	(void) socket;
+
 	const char *const baseCommand = *(char **) vectorGet(&command.args, 0);
 	if (baseCommand != NULL && *baseCommand != '\0'
 	    && strcmp(baseCommand, "help") != 0) {
@@ -35,21 +44,35 @@ void clientHelpPreSendHook(const ClientCommand command, TCPSocket *socket)
 #undef COMMAND
 }
 
-void clientLoginPreSendHook(const ClientCommand command, TCPSocket *socket) {}
+void clientLoginPreSendHook(const ClientCommand command, TCPSocket *socket)
+{
+	clientDefaultPreSendHook(command, socket);
+}
 
 void clientListClassesPreSendHook(const ClientCommand command,
                                   TCPSocket *socket)
-{}
+{
+	clientDefaultPreSendHook(command, socket);
+}
 
 void clientListSubscribedPreSendHook(const ClientCommand command,
                                      TCPSocket *socket)
-{}
+{
+	clientDefaultPreSendHook(command, socket);
+}
 
 void clientSubscribePreSendHook(const ClientCommand command, TCPSocket *socket)
-{}
+{
+	clientDefaultPreSendHook(command, socket);
+}
 
 void clientCreateClassPreSendHook(const ClientCommand command,
                                   TCPSocket *socket)
-{}
+{
+	clientDefaultPreSendHook(command, socket);
+}
 
-void clientSendPreSendHook(const ClientCommand command, TCPSocket *socket) {}
+void clientSendPreSendHook(const ClientCommand command, TCPSocket *socket)
+{
+	clientDefaultPreSendHook(command, socket);
+}
