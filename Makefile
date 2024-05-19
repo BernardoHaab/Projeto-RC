@@ -353,7 +353,7 @@ $(PRESENTATIONS): %.pdf: $(DOCS_DIR)/%.md
 $(DOCUMENTS): %.pdf: $(DOCS_DIR)/%.md
 	pandoc $(PANDOC_OPTS) --output=$@ $<
 
-Relatorio-RC-Meta_2/main.pdf: Relatorio-RC-Meta_2/main.tex
+relatorio.pdf: Relatorio-RC-Meta_2/main.tex
 	env --chdir=Relatorio-RC-Meta_2 pdflatex main.tex
 
 archive: $(ARCHIVE)
