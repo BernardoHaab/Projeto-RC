@@ -79,7 +79,7 @@ GITIGNORE += $(VENV)
 CC     = gcc
 CCP    = g++
 CFLAGS = -Wall -Wextra -Werror
-LINKS  =
+LINKS  = -lrt -pthread
 
 CFLAGS += -Wno-error=unused-parameter
 CFLAGS += -Wno-error=unused-variable
@@ -386,11 +386,37 @@ $(OBJ_DIR)/%.cpp.o: %.cpp $(HEADERS)
 
 # TODO: Add Parallel Compilation
 
-_SOURCES = server tcp/socket tcp/server udp/socket udp/server command admin class debug utils
-class_server: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+_SOURCES = \
+	   $(addprefix $(SRC_DIR)/, \
+	   admin \
+	   class \
+	   command \
+	   command/class \
+	   command/class/pre-send-hook \
+	   command/class/post-received-hook \
+	   command/config \
+	   command/config/pre-send-hook \
+	   command/config/post-received-hook \
+	   debug \
+	   server \
+	   tcp/server \
+	   tcp/socket \
+	   udp/server \
+	   udp/socket \
+	   utils) \
+	   $(addprefix veCtor/src/, vector)
+class_server: $(_SOURCES:%=$(OBJ_DIR)/%.c.o)
 	$(CC) $(CFLAGS) -o $@ $^ $(LINKS)
 
-_SOURCES = $(addprefix $(SRC_DIR)/, client tcp/socket tcp/client debug utils) \
+_SOURCES = $(addprefix $(SRC_DIR)/, \
+	   client \
+	   command/client \
+	   command/client/pre-send-hook \
+	   command/client/post-received-hook \
+	   debug \
+	   tcp/client \
+	   tcp/socket \
+	   utils) \
 	   $(addprefix veCtor/src/, vector)
 class_client: $(_SOURCES:%=$(OBJ_DIR)/%.c.o)
 	$(CC) $(CFLAGS) -o $@ $^ $(LINKS)

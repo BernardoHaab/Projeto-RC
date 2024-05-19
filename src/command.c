@@ -1,79 +1,51 @@
 #include "command.h"
 
-#include "utils.h"
-
-#include <stdio.h>
-#include <stdlib.h>
+#include <assert.h>
+#include <stdbool.h>
 #include <string.h>
 
-void parseCliCommand(const char *const string, CliCommand *cliCommand)
+Role parseRole(const char *const string)
 {
-	char *cloneString = trim(strdup(string));
-
-	destroyCliCommand(cliCommand);
-
-	for (char *token = strtok(cloneString, CLI_COMMAND_DELIMITER);
-	     token != NULL;
-	     token = strtok(NULL, CLI_COMMAND_DELIMITER)) {
-		cliCommand->args = realloc(cliCommand->args,
-		                           sizeof(cliCommand->args[0])
-		                               * ++cliCommand->nargs);
-
-		cliCommand->args[cliCommand->nargs - 1] = strdup(token);
+#define ROLE(ENUM, STRING, BIT_SHIFT)      \
+	if (strcmp(string, STRING) == 0) { \
+		return ENUM;               \
 	}
+	ROLES
+#undef ROLE
 
-	free(cloneString);
+	assert(0 && "Unknown role");
+
+	return ROLE_GUEST;
 }
 
-CliCommand parseCliCommandCopy(const char *const string)
+char *getRoleString(const Role role)
 {
-	CliCommand cliCommand = {0};
-
-	parseCliCommand(string, &cliCommand);
-
-	return cliCommand;
-}
-
-void printCliCommand(FILE *file, const CliCommand cliCommand)
-{
-	fprintf(file,
-	        "CliCommand: {\n"
-	        "\tnargs: %zu\n",
-	        cliCommand.nargs);
-
-	for (size_t i = 0; i < cliCommand.nargs; ++i) {
-		const char *const arg = cliCommand.args[i];
-		fprintf(file, "\tArgument %zu: %s\n", i, arg);
+	switch (role) {
+#define ROLE(ENUM, STRING, BIT_SHIFT) \
+	case ENUM:                    \
+		return STRING;
+		ROLES
+#undef ROLE
+	case ROLE_GUEST:
+	default:
+		return "GUEST";
+		break;
 	}
 
-	fprintf(file, "}\n");
+	assert(0 && "Unknown role");
+
+	return NULL;
 }
 
-void *sprintCliCommand(char *string, const CliCommand cliCommand)
+bool validNumberOfArgs(const int argsMin, const int argsMax, const int args)
 {
-	int off = 0;
-
-	off += sprintf(string,
-	               "CliCommand: {\n"
-	               "\tnargs: %zu\n",
-	               cliCommand.nargs);
-
-	for (size_t i = 0; i < cliCommand.nargs; ++i) {
-		const char *const arg = cliCommand.args[i];
-		off += sprintf(string + off, "\tArgument %zu: %s\n", i, arg);
+	if (argsMin >= 0 && args < argsMin) {
+		return false;
 	}
 
-	sprintf(string + off, "}\n");
-
-	return string;
-}
-
-void destroyCliCommand(CliCommand *cliCommand)
-{
-	for (size_t i = 0; i < cliCommand->nargs; ++i) {
-		free(cliCommand->args[i]);
+	if (argsMax >= 0 && args > argsMax) {
+		return false;
 	}
 
-	cliCommand->args  = NULL;
-	cliCommand->nargs = 0;
+	return true;
 }

@@ -77,3 +77,24 @@ countNChar(const char *const string, const char character, const size_t nBytes)
 
 	return count;
 }
+
+char *joinStrings(char *const strings[],
+                  const char *const separator,
+                  size_t nStrings)
+{
+	char *str          = NULL;
+	size_t totalLength = 0;
+
+	for (size_t i = 0; i < nStrings; ++i) totalLength += strlen(strings[i]);
+	totalLength += strlen(separator) * (nStrings - 1) + 1;
+
+	str    = malloc(totalLength);
+	str[0] = '\0';
+
+	for (size_t i = 0; i < nStrings; i++) {
+		strcat(str, strings[i]);
+		if (i < (nStrings - 1)) strcat(str, separator);
+	}
+
+	return str;
+}

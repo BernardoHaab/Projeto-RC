@@ -15,13 +15,14 @@
 #include <unistd.h>
 
 char *usersFilepath = NULL;
+TCPSocket classSocket;
+UDPSocket configSocket;
+
+static void cleanResources(const int signalNumber);
 
 int main(int argc, char **argv)
 {
 	char *ipAddress = SERVER_IP_DEFAULT;
-
-	pid_t wpid;
-	int status = 0;
 
 	for (int i = 0; i < argc; ++i) {
 		const char *const arg = argv[i];
@@ -38,13 +39,15 @@ int main(int argc, char **argv)
 	const int portConfig = atoi(argv[2]);
 	usersFilepath        = argv[3];
 
-	TCPSocket classSocket  = createListeningTCPSocket(ipAddress, portClass);
-	UDPSocket configSocket = createBindedUDPSocket(ipAddress, portConfig);
+	classSocket  = createListeningTCPSocket(ipAddress, portClass);
+	configSocket = createBindedUDPSocket(ipAddress, portConfig);
+
+	signal(SIGINT, cleanResources);
 
 	pid_t adminPid;
 	if ((adminPid = fork()) == 0) {
 		setupAdminConsole(&configSocket);
-		exit(0);
+		exit(EXIT_SUCCESS);
 	} else if (adminPid < 0) {
 		perror("Error forking for setupAdminConsole");
 		exit(EXIT_FAILURE);
@@ -53,7 +56,7 @@ int main(int argc, char **argv)
 	pid_t classPid;
 	if ((classPid = fork()) == 0) {
 		setupClass(&classSocket);
-		exit(0);
+		exit(EXIT_SUCCESS);
 	} else if (classPid < 0) {
 		perror("Error forking for setupClass");
 		exit(EXIT_FAILURE);
@@ -83,4 +86,22 @@ void usage(const char *const programName)
 	printf("  -h, --help                   Print this usage message\n");
 
 	exit(EXIT_FAILURE);
+}
+
+static void cleanResources(const int signalNumber)
+{
+	signal(signalNumber, SIG_IGN);
+
+#if DEBUG
+	debugMessage(stdout, INFO, "Cleaning resources...\n");
+#endif
+
+	closeTCPSocket(&classSocket);
+	closeUDPSocket(&configSocket);
+
+#if DEBUG
+	debugMessage(stdout, OK, "Cleaned resources...\n");
+#endif
+
+	signal(signalNumber, cleanResources);
 }

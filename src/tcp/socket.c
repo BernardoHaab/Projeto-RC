@@ -4,6 +4,8 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -45,13 +47,28 @@ ssize_t readFromTCPSocket(TCPSocket *connectingTCPSocket)
 	return receivedBytes;
 }
 
+void clearTCPSocketBuffer(TCPSocket *tcpSocket)
+{
+	writeToTCPSocketBuffer(tcpSocket, "");
+}
+
 void writeToTCPSocketBuffer(TCPSocket *tcpSocket, const char *const string)
 {
-	if (string == NULL || string == tcpSocket->buffer || *string == '\0') {
+	if (string == NULL || string == tcpSocket->buffer) {
 		return;
 	}
 
 	strncpy(tcpSocket->buffer, string, BUFFER_SIZE);
+}
+
+void sprintfToTCPSocketBuffer(TCPSocket *tcpSocket,
+                              const char *const format,
+                              ...)
+{
+	va_list args;
+	va_start(args, format);
+	vsnprintf(tcpSocket->buffer, BUFFER_SIZE, format, args);
+	va_end(args);
 }
 
 void writeToTCPSocket(TCPSocket *tcpSocket, const char *const string)
