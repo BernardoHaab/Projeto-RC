@@ -320,8 +320,15 @@ void classSendPreSendHook(const ClassCommand command, TCPSocket *tcpSocket)
 	}
 
 	const char *const className = *(char **) vectorGet(&command.args, 1);
-	// TODO: Add remaning args to message
-	const char *const msg       = *(char **) vectorGet(&command.args, 2);
+	char *message               = NULL;
+	int messageLength           = 1;
+	for (size_t i = 2; i < command.args.size; ++i) {
+		const char *const arg  = *(char **) vectorGet(&command.args, i);
+		messageLength         += strlen(arg) + 1;
+		message                = realloc(message, messageLength);
+		strcat(message, arg);
+		strcat(message, " ");
+	}
 
 	int shmFd = shm_open(CLASSES_OBJ_NAME, O_RDWR, S_IRUSR | S_IWUSR);
 	ftruncate(shmFd, sizeof(Class) * CLASS_MAX_SIZE);
@@ -361,8 +368,8 @@ void classSendPreSendHook(const ClassCommand command, TCPSocket *tcpSocket)
 			// send the multicast message
 			if (sendto(
 			        socketFD,
-			        msg,
-			        strnlen(msg, BUFFER_SIZE),
+			        message,
+			        strnlen(message, BUFFER_SIZE),
 			        0,
 			        (struct sockaddr *) &classes_ptr[i].ipMulticast,
 			        sizeof(classes_ptr[i].ipMulticast))
@@ -380,6 +387,7 @@ void classSendPreSendHook(const ClassCommand command, TCPSocket *tcpSocket)
 
 	munmap(classes_ptr, sizeof(Class) * CLASS_MAX_SIZE);
 	close(shmFd);
+	free(message);
 }
 
 /* ClassCommand processClassCommand(const CliCommand cliCommand, */
