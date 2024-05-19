@@ -92,8 +92,16 @@ static void cleanResources(const int signalNumber)
 {
 	signal(signalNumber, SIG_IGN);
 
+#if DEBUG
+	debugMessage(stdout, INFO, "Cleaning resources...\n");
+#endif
+
 	closeTCPSocket(&classSocket);
 	closeUDPSocket(&configSocket);
+
+#if DEBUG
+	debugMessage(stdout, OK, "Cleaned resources...\n");
+#endif
 
 	signal(signalNumber, cleanResources);
 }
