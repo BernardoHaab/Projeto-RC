@@ -9,7 +9,6 @@
 #include "vector.h"
 
 #include <arpa/inet.h>
-#include <assert.h>
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <stdbool.h>
@@ -245,6 +244,7 @@ printLoggedClient(FILE *file, const void *const data, const size_t size)
 {
 	(void) size;
 
-	// TODO: Print Logged Client
-	assert(0 && "printLoggedClient not implemented yet\n");
+	fprintf(file,
+	        "%s",
+	        inet_ntoa(((LoggedClient *) data)->address.sin_addr));
 }

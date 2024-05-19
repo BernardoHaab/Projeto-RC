@@ -25,6 +25,12 @@ typedef struct LoggedClient {
 	Role role;
 } LoggedClient;
 
+#define LOGGED_CLIENT_FORMAT \
+	"{\n"                \
+	"  address: %s\n"    \
+	"  role: %s\n"       \
+	"}"
+
 typedef struct {
 	char name[USERNAME_MAX_LENGTH + 1];
 	struct sockaddr_in ipMulticast;
