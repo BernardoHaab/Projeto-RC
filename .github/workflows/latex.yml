@@ -16,8 +16,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install pandoc and pdflatex
-      run: sudo apt-get install -y pandoc texlive-full
-    - name: Markdown Compilation
-      run: make relatorio.pdf
+      run: sudo apt-get install -y pandoc texlive-base latex texlive-latex-recommended texlive-latex-extra texlive-lang-portuguese
     - name: Latex Compilation
-      run: make Relatorio-RC-Meta_2/main.pdf
+      run: make relatorio.pdf
