@@ -360,7 +360,7 @@ archive: $(ARCHIVE)
 
 .PHONY: $(ARCHIVE)
 $(ARCHIVE): $(DOCUMENTS) $(PRESENTATIONS)
-	git archive --output=$@ $(^:%=--add-file=%) HEAD
+	git ls-files --recurse-submodules | xargs zip $@ $^
 
 # }}}
 
