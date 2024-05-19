@@ -354,7 +354,7 @@ $(DOCUMENTS): %.pdf: $(DOCS_DIR)/%.md
 	pandoc $(PANDOC_OPTS) --output=$@ $<
 
 relatorio.pdf: Relatorio-RC-Meta_2/main.tex
-	env --chdir=Relatorio-RC-Meta_2 pdflatex main.tex
+	./scripts/build-latex.sh
 
 archive: $(ARCHIVE)
 
