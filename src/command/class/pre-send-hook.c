@@ -319,16 +319,16 @@ void classSendPreSendHook(const ClassCommand command, TCPSocket *tcpSocket)
 		return;
 	}
 
-	const char *const className = *(char **) vectorGet(&command.args, 1);
-	char *message               = NULL;
-	int messageLength           = 1;
+	const size_t messageCount  = command.args.size - 2;
+	char **const messagesArray = malloc(sizeof(char *) * messageCount);
 	for (size_t i = 2; i < command.args.size; ++i) {
-		const char *const arg  = *(char **) vectorGet(&command.args, i);
-		messageLength         += strlen(arg) + 1;
-		message                = realloc(message, messageLength);
-		strcat(message, arg);
-		strcat(message, " ");
+		messagesArray[i - 2] = *(char **) vectorGet(&command.args, i);
 	}
+
+	const char *const className = *(char **) vectorGet(&command.args, 1);
+	char *const message = joinStrings(messagesArray, " ", messageCount);
+
+	free(messagesArray);
 
 	int shmFd = shm_open(CLASSES_OBJ_NAME, O_RDWR, S_IRUSR | S_IWUSR);
 	ftruncate(shmFd, sizeof(Class) * CLASS_MAX_SIZE);
