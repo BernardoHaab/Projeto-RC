@@ -6,7 +6,6 @@
 #include "utils.h"
 #include "vector.h"
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
