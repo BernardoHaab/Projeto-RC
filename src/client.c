@@ -9,20 +9,14 @@
 
 #include <arpa/inet.h>
 #include <bits/types/struct_iovec.h>
-#include <fcntl.h>
 #include <netinet/in.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-
-sem_t promptSemaphore;
-static void initializeSemaphore(void);
-static void terminateSemaphore(void);
 
 int main(int argc, char **argv)
 {
@@ -36,8 +30,6 @@ int main(int argc, char **argv)
 	if (argc != 3) {
 		usage(argv[0]);
 	}
-
-	initializeSemaphore();
 
 	const char *const serverIPAddress = argv[1];
 	const int classPort               = atoi(argv[2]);
@@ -60,7 +52,6 @@ int main(int argc, char **argv)
 
 		bool validCommand = false;
 		while (!validCommand) {
-			sem_wait(&promptSemaphore);
 			printf(PROMPT);
 			if (scanf(" %[^\n]%*c", connectionTCPSocket.buffer)
 			        == EOF
@@ -70,7 +61,6 @@ int main(int argc, char **argv)
 			           == 0) {
 				exit(EXIT_FAILURE);
 			}
-			sem_post(&promptSemaphore);
 
 			commandOpt
 			    = parseClientCommand(connectionTCPSocket.buffer);
@@ -96,8 +86,6 @@ int main(int argc, char **argv)
 
 	closeTCPSocket(&connectionTCPSocket);
 
-	terminateSemaphore();
-
 	return 0;
 }
 
@@ -115,7 +103,6 @@ void *clientMultiCastThread(void *argument)
 {
 #define EXIT_THREAD(MESSAGE)                \
 	do {                                \
-		sem_post(&promptSemaphore); \
 		perror(MESSAGE);            \
 		vectorClear(args);          \
 		pthread_exit(NULL);         \
@@ -130,9 +117,7 @@ void *clientMultiCastThread(void *argument)
 	printf("Thread starting for multicast IP: %s...\n", multicastIPString);
 #endif
 
-	sem_post(&promptSemaphore);
-
-	sem_wait(&promptSemaphore);
+	//	pthread_exit(NULL);
 
 	int sock;
 	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -155,13 +140,11 @@ void *clientMultiCastThread(void *argument)
 		EXIT_THREAD("setsockopt: ");
 	}
 
-	sem_post(&promptSemaphore);
-
 	int nbytes;
 	unsigned int addrlen;
 	char msg[256] = {0};
 	while (1) {
-		memset(msg, 0, sizeof(msg));
+		memset(msg, 0, sizeof(msg) - 1);
 		if ((nbytes = recvfrom(sock,
 		                       msg,
 		                       sizeof(msg) - 1,
@@ -172,9 +155,7 @@ void *clientMultiCastThread(void *argument)
 			EXIT_THREAD("recvfrom: ");
 		}
 
-		sem_wait(&promptSemaphore);
 		printf("Received multicast message: %s\n", msg);
-		sem_post(&promptSemaphore);
 	}
 
 	if (setsockopt(sock,
@@ -191,16 +172,4 @@ void *clientMultiCastThread(void *argument)
 	vectorClear(args);
 	pthread_exit(NULL);
 #undef EXIT_THREAD
-}
-
-static void initializeSemaphore(void)
-{
-	if (sem_init(&promptSemaphore, 0, 1) == -1) {
-		perror("sem_init: ");
-	}
-}
-
-static void terminateSemaphore(void)
-{
-	sem_destroy(&promptSemaphore);
 }

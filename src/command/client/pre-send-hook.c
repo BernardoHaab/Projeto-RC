@@ -6,12 +6,9 @@
 #include <assert.h>
 #include <bits/pthreadtypes.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-extern sem_t promptSemaphore;
 
 static void clientDefaultPreSendHook(const ClientCommand command,
                                      TCPSocket *socket)

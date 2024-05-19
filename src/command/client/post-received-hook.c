@@ -5,11 +5,8 @@
 
 #include <bits/pthreadtypes.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <stdio.h>
 #include <string.h>
-
-extern sem_t promptSemaphore;
 
 static void clientDefaultPostReceiveHook(const TCPSocket socket)
 {
@@ -38,7 +35,7 @@ void clientListSubscribedPostReceiveHook(const TCPSocket socket)
 
 void clientSubscribePostReceiveHook(const TCPSocket socket)
 {
-	Vector args = vectorStringSplit(socket.buffer, COMMAND_DELIMITER);
+	Vector args = vectorStringSplit(socket.buffer, COMMAND_DELIMITER "/:");
 
 	if (args.size != 2
 	    || strcmp(*(char **) vectorGet(&args, 1), COMMAND_REPLY_REJECTED)
@@ -48,7 +45,6 @@ void clientSubscribePostReceiveHook(const TCPSocket socket)
 	}
 
 	pthread_t thread;
-	sem_wait(&promptSemaphore);
 	pthread_create(&thread, NULL, clientMultiCastThread, &args);
 
 	clientDefaultPostReceiveHook(socket);
