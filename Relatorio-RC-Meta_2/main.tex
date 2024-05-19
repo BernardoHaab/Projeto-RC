@@ -1,4 +1,4 @@
-\documentclass[a4paper]{article} 
+\documentclass[a4paper]{article}
 \input{head}
 
 \begin{document}
@@ -25,25 +25,25 @@
 }
 
 \fancyhead[C]{}
-\hrule \medskip 
-\begin{minipage}{0.295\textwidth} 
+\hrule \medskip
+\begin{minipage}{0.295\textwidth}
 \raggedright
 \footnotesize
 Bernardo Haab  \hfill\\
 Luis Gois
 \end{minipage}
-\begin{minipage}{0.4\textwidth} 
-\centering 
-\large 
-Trabalho  Prático 1 - Meta 1\\ 
-\normalsize 
-Redes de Comunicação\\ 
+\begin{minipage}{0.4\textwidth}
+\centering
+\large
+Trabalho  Prático 1 - Meta 1\\
+\normalsize
+Redes de Comunicação\\
 \end{minipage}
-\begin{minipage}{0.295\textwidth} 
+\begin{minipage}{0.295\textwidth}
 \raggedleft
 \today\hfill\\
 \end{minipage}
-\medskip\hrule 
+\medskip\hrule
 \bigskip
 
 \newenvironment{itemize*}%
@@ -54,13 +54,13 @@ Redes de Comunicação\\
 
 \section{Introdução}
 
-Este relatório apresenta as decisões feitas na implementação do projeto de compartilhamento de conteúdo entre professores e alunos. O projeto prevê algumas funcionalidades, divididas entre perfis de "administrador", "professor", e "aluno". 
+Este relatório apresenta as decisões feitas na implementação do projeto de compartilhamento de conteúdo entre professores e alunos. O projeto prevê algumas funcionalidades, divididas entre perfis de "administrador", "professor", e "aluno".
 
 Aos administradores é atribuída a gerência de utilizadores, podendo adicionar, deletar, ou listar utilizadores. O administrador também pode desligar o servidor, impedindo que professores compartilhem conteúdos com seus alunos. Os professores possuem permissão para criar turmas, e enviar conteúdos a essas turmas. Aos alunos é permitido inscrever-se em turmas criadas por professores, e, a partir deste momento, os alunos passam a receber os conteúdos compartilhados pelos professores. Os alunos ainda podem verificar a turmas existentes, e quais está inscrito.
 
 \section{Decisões arquiteturais}
 
-O servidor é inicializado com o comando já especificado pelo professor: 
+O servidor é inicializado com o comando já especificado pelo professor:
 
 \begin{verbatim}
     class_server {PORTO_TURMAS} {PORTO_CONFIG} {ficheiro configuração}
@@ -86,7 +86,27 @@ Os processos realizados pelo servidor estão separados em duas grandes áreas no
 
 Destaca-se que, por conta da arquitetura criada para o projeto, o login é realizado por duas funções. A autenticação de administradores é feita separadamente da dos demais usuários. Com isso, é garantido que os administradores não podem acessar o sistema via \textit{TCP}, e alunos e professores não acessam via \textit{UDP}.
 
-% As funcionalidades descritas anteriormente são realizadas por um servidor desenvolvido. Assim, os usuários precisam se comunicar com o servidor para poder acessar o sistema. Usuários com perfil de administrador acessam o sistema diretamente por meio do comando \textit{netcat}. 
+A execução do servidor pode ser vista na figura \ref{fig:servidor}. Com esta figura é possível verificar que o processo da administração (realizado no processo UDP) é feito separadamente do processamento de alunos e professores (realizado no processo TCP).
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/Servidor.jpg}
+    \caption{Execução do Servidor}
+    \label{fig:servidor}
+\end{figure}
+
+A execução do programa cliente utilizado por professores e alunos pode ser vista na figura \ref{fig:cliente}. É possível verificar que após a inscrição em um turma uma nova thread é criada, responsável por receber conteúdos postados por professores. Esta arquitetura permite que os alunos possam seguir utilizando o sistema após inscrever-se em uma turma.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/Cliente.jpg}
+    \caption{Execução do Cliente}
+    \label{fig:cliente}
+\end{figure}
+
+Para que compilar este projeto no ambiente e permitir o teste no ambiente \textit{gns3} é utilizada a regra \textit{install} do arquivo Makefile. Esta regra compila os programas \textit{class\_server} e \textit{class\_client}, e os copia para todos os container utilizados no \textit{gns3},
+
+% As funcionalidades descritas anteriormente são realizadas por um servidor desenvolvido. Assim, os usuários precisam se comunicar com o servidor para poder acessar o sistema. Usuários com perfil de administrador acessam o sistema diretamente por meio do comando \textit{netcat}.
 
 % Como o administrador pode acessar as suas funções
 % Como é feito o envio do conteúdo? O servidor envia
