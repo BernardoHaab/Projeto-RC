@@ -4,6 +4,7 @@
 #include "udp/socket.h"
 
 #include <stdbool.h>
+#include <stdio.h>
 
 static const PostReceiveHookResponse validPostReceiveHookResponse = {
     .valid  = true,
@@ -21,6 +22,10 @@ configDefaultPostReceiveHook(const UDPSocket socket)
 {
 	const ConfigCommandOptional commandOpt
 	    = parseConfigCommand(socket.buffer);
+
+#if DEBUG
+	printConfigCommand(stdout, commandOpt.command);
+#endif
 
 	if (!commandOpt.valid) {
 		return INVALID_POST_RECEIVE_HOOK_RESPONSE("Unknown command");

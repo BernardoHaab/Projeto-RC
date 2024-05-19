@@ -102,6 +102,12 @@ void configAddUserPreSendHook(const ConfigCommand command, UDPSocket *socket)
 {
 	clearUDPSocketBuffer(socket);
 
+	if (!isLogged(&loggedAdmins, socket->address)) {
+		debugMessage(stderr, ERROR, "Not logged in\n");
+		sprintfToUDPSocketBuffer(socket, "Not logged in\n");
+		return;
+	}
+
 	if (usersFilepath == NULL) {
 		debugMessage(stdout, ERROR, "Users filepath not set\n");
 		return;
@@ -151,6 +157,12 @@ void configDeleteUserPreSendHook(const ConfigCommand command, UDPSocket *socket)
 {
 	clearUDPSocketBuffer(socket);
 
+	if (!isLogged(&loggedAdmins, socket->address)) {
+		debugMessage(stderr, ERROR, "Not logged in\n");
+		sprintfToUDPSocketBuffer(socket, "Not logged in\n");
+		return;
+	}
+
 #define TEMP_FILENAME "temp.txt"
 
 	if (usersFilepath == NULL) {
@@ -195,8 +207,10 @@ void configDeleteUserPreSendHook(const ConfigCommand command, UDPSocket *socket)
 		strncpy(lineCopy, line, USER_CSV_ENTRY_MAX_LENGTH);
 
 		char *user = strtok(lineCopy, CSV_DELIMITER);
+#if DEBUG
 		printf("Usuário:             %s\n", user);
 		printf("Usuário para apagar: %s\n", userToDelete);
+#endif
 
 		if (!found && strcmp(userToDelete, user) == 0) {
 			found = true;
@@ -227,6 +241,12 @@ void configDeleteUserPreSendHook(const ConfigCommand command, UDPSocket *socket)
 void configListUsersPreSendHook(const ConfigCommand command, UDPSocket *socket)
 {
 	clearUDPSocketBuffer(socket);
+
+	if (!isLogged(&loggedAdmins, socket->address)) {
+		debugMessage(stderr, ERROR, "Not logged in\n");
+		sprintfToUDPSocketBuffer(socket, "Not logged in\n");
+		return;
+	}
 
 	if (usersFilepath == NULL) {
 		debugMessage(stdout, ERROR, "Users filepath not set\n");
@@ -270,5 +290,11 @@ void configListUsersPreSendHook(const ConfigCommand command, UDPSocket *socket)
 void configQuitServerPreSendHook(const ConfigCommand command, UDPSocket *socket)
 {
 	(void) command;
+
+	if (!isLogged(&loggedAdmins, socket->address)) {
+		debugMessage(stderr, ERROR, "Not logged in\n");
+		sprintfToUDPSocketBuffer(socket, "Not logged in\n");
+		return;
+	}
 	writeToUDPSocketBuffer(socket, "Closing server...\n");
 }
