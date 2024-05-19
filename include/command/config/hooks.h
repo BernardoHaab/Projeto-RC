@@ -11,7 +11,7 @@
                 PRE_SEND_HOOK,                                              \
                 POST_RECEIVE_HOOK)                                          \
 	void PRE_SEND_HOOK(const ConfigCommand command, UDPSocket *socket); \
-	void POST_RECEIVE_HOOK(const char *const response);
+	PostReceiveHookResponse POST_RECEIVE_HOOK(const UDPSocket socket);
 CONFIG_COMMANDS
 #undef COMMAND
 

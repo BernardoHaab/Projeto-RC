@@ -3,7 +3,6 @@
 #include "tcp/socket.h"
 #include "vector.h"
 
-#include <assert.h>
 #include <bits/pthreadtypes.h>
 #include <pthread.h>
 #include <semaphore.h>
@@ -19,7 +18,7 @@ static void clientDefaultPostReceiveHook(const TCPSocket socket)
 
 void clientHelpPostReceiveHook(const TCPSocket socket)
 {
-	assert(0 && "TODO: Not yet implemented\n");
+	clientDefaultPostReceiveHook(socket);
 }
 
 void clientLoginPostReceiveHook(const TCPSocket socket)

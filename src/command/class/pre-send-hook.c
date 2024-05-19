@@ -8,7 +8,6 @@
 #include "vector.h"
 
 #include <arpa/inet.h>
-#include <assert.h>
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <stdbool.h>

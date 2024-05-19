@@ -76,6 +76,12 @@ int getArgsMaxFromConfigCommandType(const ConfigCommandType command);
 int getArgsMinFromConfigCommandType(const ConfigCommandType command);
 const char *getUsageArgsFromConfigCommand(const ConfigCommandType command);
 
+#define REASON_MAX 1024
+typedef struct {
+	bool valid;
+	char reason[REASON_MAX + 1];
+} PostReceiveHookResponse;
+
 typedef struct ConfigCommand {
 	ConfigCommandType command;
 	Vector args;
@@ -84,12 +90,13 @@ typedef struct ConfigCommand {
 	int argsMax;
 	void (*preSendHook)(const struct ConfigCommand command,
 	                    UDPSocket *socket);
-	void (*postReceiveHook)(const char *const response);
+	PostReceiveHookResponse (*postReceiveHook)(const UDPSocket socket);
 } ConfigCommand;
 
 typedef void (*PreSendHookFunction)(const ConfigCommand command,
                                     UDPSocket *socket);
-typedef void (*PostReceiveHookFunction)(const char *const response);
+typedef PostReceiveHookResponse (*PostReceiveHookFunction)(
+    const UDPSocket socket);
 PreSendHookFunction getConfigPreSendHook(const ConfigCommandType command);
 PostReceiveHookFunction
 getConfigPostReceiveHook(const ConfigCommandType command);

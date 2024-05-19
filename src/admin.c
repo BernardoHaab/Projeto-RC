@@ -49,6 +49,14 @@ void setupAdminConsole(UDPSocket *serverUDPSocket)
 
 		printConfigCommand(stdout, command);
 
+		const PostReceiveHookResponse response
+		    = command.postReceiveHook(clientUDPSocket);
+		if (!response.valid) {
+			destroyConfigCommand(&command);
+			debugMessage(stdout, ERROR, "%s\n", response.reason);
+			writeToUDPSocket(&clientUDPSocket, response.reason);
+			continue;
+		}
 
 		command.preSendHook(command, &clientUDPSocket);
 

@@ -1,36 +1,69 @@
+#include "command.h"
+#include "command/config.h"
 #include "command/config/hooks.h"
+#include "udp/socket.h"
 
-#include <assert.h>
+#include <stdbool.h>
 
-void configHelpPostReceiveHook(const char *const response)
+static const PostReceiveHookResponse validPostReceiveHookResponse = {
+    .valid  = true,
+    .reason = "",
+};
+
+#define INVALID_POST_RECEIVE_HOOK_RESPONSE(REASON) \
+	((PostReceiveHookResponse){                \
+	    .valid  = false,                       \
+	    .reason = REASON,                      \
+	})
+
+static PostReceiveHookResponse
+configDefaultPostReceiveHook(const UDPSocket socket)
 {
-	assert(0 && "TODO: configHelpPostReceiveHook Not yet implemented\n");
+	const ConfigCommandOptional commandOpt
+	    = parseConfigCommand(socket.buffer);
+
+	if (!commandOpt.valid) {
+		return INVALID_POST_RECEIVE_HOOK_RESPONSE("Unknown command");
+	}
+
+	const ConfigCommand command = commandOpt.command;
+
+	if (!validNumberOfArgs(command.argsMin,
+	                       command.argsMax,
+	                       command.args.size)) {
+		return INVALID_POST_RECEIVE_HOOK_RESPONSE(
+		    "Invalid number of arguments");
+	}
+
+	return validPostReceiveHookResponse;
 }
 
-void configLoginPostReceiveHook(const char *const response)
+PostReceiveHookResponse configHelpPostReceiveHook(const UDPSocket socket)
 {
-	assert(0 && "TODO: configLoginPostReceiveHook Not yet implemented\n");
+	return configDefaultPostReceiveHook(socket);
 }
 
-void configAddUserPostReceiveHook(const char *const response)
+PostReceiveHookResponse configLoginPostReceiveHook(const UDPSocket socket)
 {
-	assert(0 && "TODO: configAddUserPostReceiveHook Not yet implemented\n");
+	return configDefaultPostReceiveHook(socket);
 }
 
-void configDeleteUserPostReceiveHook(const char *const response)
+PostReceiveHookResponse configAddUserPostReceiveHook(const UDPSocket socket)
 {
-	assert(
-	    0 && "TODO: configDeleteUserPostReceiveHook Not yet implemented\n");
+	return configDefaultPostReceiveHook(socket);
 }
 
-void configListUsersPostReceiveHook(const char *const response)
+PostReceiveHookResponse configDeleteUserPostReceiveHook(const UDPSocket socket)
 {
-	assert(0
-	       && "TODO: configListUsersPostReceiveHook Not yet implemented\n");
+	return configDefaultPostReceiveHook(socket);
 }
 
-void configQuitServerPostReceiveHook(const char *const response)
+PostReceiveHookResponse configListUsersPostReceiveHook(const UDPSocket socket)
 {
-	assert(
-	    0 && "TODO: configQuitServerPostReceiveHook Not yet implemented\n");
+	return configDefaultPostReceiveHook(socket);
+}
+
+PostReceiveHookResponse configQuitServerPostReceiveHook(const UDPSocket socket)
+{
+	return configDefaultPostReceiveHook(socket);
 }

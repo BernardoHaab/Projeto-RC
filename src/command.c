@@ -1,6 +1,7 @@
 #include "command.h"
 
 #include <assert.h>
+#include <stdbool.h>
 #include <string.h>
 
 Role parseRole(const char *const string)
@@ -34,4 +35,17 @@ char *getRoleString(const Role role)
 	assert(0 && "Unknown role");
 
 	return NULL;
+}
+
+bool validNumberOfArgs(const int argsMin, const int argsMax, const int args)
+{
+	if (argsMin >= 0 && args < argsMin) {
+		return false;
+	}
+
+	if (argsMax >= 0 && args > argsMax) {
+		return false;
+	}
+
+	return true;
 }

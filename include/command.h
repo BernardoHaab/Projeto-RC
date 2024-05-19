@@ -27,6 +27,7 @@ typedef enum {
 
 Role parseRole(const char *const string);
 char *getRoleString(const Role role);
+bool validNumberOfArgs(const int argsMin, const int argsMax, const int args);
 
 #define COMMAND_DELIMITER " \n"
 
