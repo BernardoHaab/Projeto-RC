@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 	pid_t adminPid;
 	if ((adminPid = fork()) == 0) {
 		setupAdminConsole(&configSocket);
-		exit(0);
+		exit(EXIT_SUCCESS);
 	} else if (adminPid < 0) {
 		perror("Error forking for setupAdminConsole");
 		exit(EXIT_FAILURE);
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 	pid_t classPid;
 	if ((classPid = fork()) == 0) {
 		setupClass(&classSocket);
-		exit(0);
+		exit(EXIT_SUCCESS);
 	} else if (classPid < 0) {
 		perror("Error forking for setupClass");
 		exit(EXIT_FAILURE);
