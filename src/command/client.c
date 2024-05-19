@@ -14,7 +14,23 @@
 
 char *clientCommandTypeToString(const ClientCommandType command)
 {
-	assert(0 && "Not implemented yet");
+	switch (command) {
+#define COMMAND(ENUM,                      \
+                ROLE,                      \
+                BASE_COMMAND,              \
+                USAGE_ARGS,                \
+                ARGS_MIN,                  \
+                ARGS_MAX,                  \
+                PRE_SEND_HOOK_SUFFIX,      \
+                POST_RECEIVED_HOOK_SUFFIX) \
+	case ENUM:                         \
+		return #BASE_COMMAND;
+		CLIENT_COMMANDS
+#undef COMMAND
+	}
+
+	assert(0 && "Unknown command type");
+
 	return NULL;
 }
 
