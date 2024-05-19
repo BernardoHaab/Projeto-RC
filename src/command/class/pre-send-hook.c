@@ -111,19 +111,11 @@ void classListClassesPreSendHook(const ClassCommand command, TCPSocket *socket)
 	                                    shmFd,
 	                                    0);
 
-	if (classes_ptr == MAP_FAILED) {
-		error("Error mapping memory");
-		close(shmFd);
-		return;
-	}
-
-
 	char response[4096] = {0};
 	sprintf(response, "Class ");
 
 	bool isFirstClass = true;
 
-	int classCount = 0;
 	for (int i = 0; i < CLASS_MAX_SIZE; i++) {
 		char ip[INET_ADDRSTRLEN] = {0};
 
@@ -138,14 +130,13 @@ void classListClassesPreSendHook(const ClassCommand command, TCPSocket *socket)
 			}
 			isFirstClass = false;
 			strcat(response, classes_ptr[i].name);
-			classCount++;
 		}
 	}
 
 	munmap(classes_ptr, sizeof(Class) * CLASS_MAX_SIZE);
 	close(shmFd);
 
-	writeToTCPSocketBuffer(socket, classCount == 0 ? "" : response);
+	writeToTCPSocketBuffer(socket, response);
 }
 
 void classListSubscribedPreSendHook(const ClassCommand command,
@@ -178,7 +169,6 @@ void classListSubscribedPreSendHook(const ClassCommand command,
 	char response[4096] = {0};
 	sprintf(response, "Class ");
 
-	int classCount = 0;
 	for (int i = 0; i < CLASS_MAX_SIZE; i++) {
 		if (classes_ptr[i].currentStudents == 0) {
 			continue;
@@ -206,14 +196,13 @@ void classListSubscribedPreSendHook(const ClassCommand command,
 			strcat(response, classes_ptr[i].name);
 			strcat(response, "/");
 			strcat(response, multicastIp);
-			classCount++;
 		}
 	}
 
 	munmap(classes_ptr, sizeof(Class) * CLASS_MAX_SIZE);
 	close(shmFd);
 
-	writeToTCPSocketBuffer(socket, classCount == 0 ? "" : response);
+	writeToTCPSocketBuffer(socket, response);
 }
 
 void classSubscribePreSendHook(const ClassCommand command, TCPSocket *socket)
