@@ -44,17 +44,20 @@ int main(int argc, char **argv)
 	TCPSocket connectionTCPSocket
 	    = createConnectedTCPSocket(serverIPAddress, classPort);
 
-	ClassCommandOptional commandOpt = {0};
+	ClientCommandOptional commandOpt = {0};
 	loop
 	{
 		readFromTCPSocket(&connectionTCPSocket);
 
-		if (commandOpt.command.postReceiveHook != NULL) {
-			commandOpt.command.postReceiveHook(connectionTCPSocket);
+		ClientCommand command = commandOpt.command;
+
+		if (command.postReceiveHook != NULL) {
+			command.postReceiveHook(connectionTCPSocket);
+		} else {
+			printf("%s\n", connectionTCPSocket.buffer);
 		}
 
-		bool validCommand    = false;
-		ClassCommand command = {0};
+		bool validCommand = false;
 		while (!validCommand) {
 			sem_wait(&promptSemaphore);
 			printf(PROMPT);

@@ -4,35 +4,35 @@
 
 void classHelpPostReceiveHook(const TCPSocket socket)
 {
-	assert(0 && "TODO: Not yet implemented\n");
+	(void) socket;
 }
 
 void classLoginPostReceiveHook(const TCPSocket socket)
 {
-	assert(0 && "TODO: Not yet implemented\n");
+	(void) socket;
 }
 
 void classListClassesPostReceiveHook(const TCPSocket socket)
 {
-	assert(0 && "TODO: Not yet implemented\n");
+	(void) socket;
 }
 
 void classListSubscribedPostReceiveHook(const TCPSocket socket)
 {
-	assert(0 && "TODO: Not yet implemented\n");
+	(void) socket;
 }
 
 void classSubscribePostReceiveHook(const TCPSocket socket)
 {
-	assert(0 && "TODO: Not yet implemented\n");
+	(void) socket;
 }
 
 void classCreateClassPostReceiveHook(const TCPSocket socket)
 {
-	assert(0 && "TODO: Not yet implemented\n");
+	(void) socket;
 }
 
 void classSendPostReceiveHook(const TCPSocket socket)
 {
-	assert(0 && "TODO: Not yet implemented\n");
+	(void) socket;
 }

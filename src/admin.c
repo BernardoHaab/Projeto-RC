@@ -53,6 +53,7 @@ void setupAdminConsole(UDPSocket *serverUDPSocket)
 		command.preSendHook(command, &clientUDPSocket);
 
 		sendToUDPSocket(&clientUDPSocket);
+		fflush(stdout);
 	} while (command.command != CONFIG_QUIT_SERVER);
 
 	// TODO: Corrigir o close do socket?

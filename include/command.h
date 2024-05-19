@@ -26,7 +26,7 @@ typedef enum {
 } Role;
 
 Role parseRole(const char *const string);
-char *getStringFromRole(const Role role);
+char *getRoleString(const Role role);
 
 #define COMMAND_DELIMITER " \n"
 

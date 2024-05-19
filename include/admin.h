@@ -2,7 +2,6 @@
 #define ADMIN_H
 
 #include "command.h"
-#include "command/config.h"
 #include "udp/socket.h"
 
 #include <netinet/in.h>

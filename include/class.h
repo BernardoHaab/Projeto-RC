@@ -34,10 +34,6 @@ typedef struct {
 } Class;
 
 
-/* ClassCommand processClassCommand(const CliCommand cliCommand, */
-/*                                  const bool isLoggedIn, */
-/*                                  char *responseBuffer, */
-/*                                  const size_t responseBufferSize); */
 bool isClientLogged(const Vector loggedClients,
                     const struct sockaddr_in clientIP);
 bool isSameAddress(const struct sockaddr_in a, const struct sockaddr_in b);
@@ -46,6 +42,10 @@ void resetClasses();
 void addClientLogin(Vector *loggedClients,
                     const struct sockaddr_in clientIP,
                     const Role role);
+LoggedClient *getLoggedClient(const Vector loggedClients,
+                              const struct sockaddr_in clientIP);
+Role getLoggedClientRole(const Vector loggedClients,
+                         const struct sockaddr_in clientIP);
 void setupClass(TCPSocket *tcpSocket);
 void processClient(TCPSocket clientTCPSocket);
 void getFormatedIp(struct sockaddr_in ip, char *buffer);

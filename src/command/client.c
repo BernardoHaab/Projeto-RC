@@ -12,9 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *classCommandTypeToString(const ClientCommandType command)
+char *clientCommandTypeToString(const ClientCommandType command)
 {
-	assert(0 && "classCommandTypeToString Not implemented yet");
+	assert(0 && "Not implemented yet");
 	return NULL;
 }
 
@@ -131,7 +131,7 @@ const char *getClientCommandUsageArgs(const ClientCommandType command)
 	return NULL;
 }
 
-PreSendHookFunction getClassPreSendHook(const ClientCommandType command)
+PreSendHookFunction getClientPreSendHook(const ClientCommandType command)
 {
 	switch (command) {
 #define COMMAND(ENUM,                      \
@@ -153,7 +153,8 @@ PreSendHookFunction getClassPreSendHook(const ClientCommandType command)
 	return NULL;
 }
 
-PostReceiveHookFunction getClassPostReceiveHook(const ClientCommandType command)
+PostReceiveHookFunction
+getClientPostReceiveHook(const ClientCommandType command)
 {
 	switch (command) {
 #define COMMAND(ENUM,                      \
@@ -197,8 +198,8 @@ ClientCommandOptional parseClientCommand(const char *const string)
 		    .usageArgs = (char *) getClientCommandUsageArgs(baseCommand),
 		    .argsMin = getClientCommandArgsMin(baseCommand),
 		    .argsMax = getClientCommandArgsMax(baseCommand),
-		    .preSendHook = getClassPreSendHook(baseCommand),
-		    .postReceiveHook = getClassPostReceiveHook(baseCommand),
+		    .preSendHook = getClientPreSendHook(baseCommand),
+		    .postReceiveHook = getClientPostReceiveHook(baseCommand),
 	    },
 	};
 
@@ -208,8 +209,8 @@ ClientCommandOptional parseClientCommand(const char *const string)
 void printClientCommand(FILE *file, const ClientCommand command)
 {
 	fprintf(file,
-	        CLASS_COMMAND_FORMAT "\n",
-	        classCommandTypeToString(command.command),
+	        CLIENT_COMMAND_FORMAT "\n",
+	        clientCommandTypeToString(command.command),
 	        vectorString(command.args));
 }
 
@@ -220,8 +221,8 @@ void *sprintClientCommand(char *string, const ClientCommand command)
 	}
 
 	sprintf(string,
-	        CLASS_COMMAND_FORMAT "\n",
-	        classCommandTypeToString(command.command),
+	        CLIENT_COMMAND_FORMAT "\n",
+	        clientCommandTypeToString(command.command),
 	        vectorString(command.args));
 
 	return string;

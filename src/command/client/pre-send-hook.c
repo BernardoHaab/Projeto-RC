@@ -39,15 +39,11 @@ void clientLoginPreSendHook(const ClientCommand command, TCPSocket *socket) {}
 
 void clientListClassesPreSendHook(const ClientCommand command,
                                   TCPSocket *socket)
-{
-	assert(0 && "TODO: Not yet implemented\n");
-}
+{}
 
 void clientListSubscribedPreSendHook(const ClientCommand command,
                                      TCPSocket *socket)
-{
-	assert(0 && "TODO: Not yet implemented\n");
-}
+{}
 
 void clientSubscribePreSendHook(const ClientCommand command, TCPSocket *socket)
 {
@@ -63,11 +59,6 @@ void clientSubscribePreSendHook(const ClientCommand command, TCPSocket *socket)
 
 void clientCreateClassPreSendHook(const ClientCommand command,
                                   TCPSocket *socket)
-{
-	assert(0 && "TODO: Not yet implemented\n");
-}
+{}
 
-void clientSendPreSendHook(const ClientCommand command, TCPSocket *socket)
-{
-	assert(0 && "TODO: Not yet implemented\n");
-}
+void clientSendPreSendHook(const ClientCommand command, TCPSocket *socket) {}

@@ -15,6 +15,10 @@
 #include <unistd.h>
 
 char *usersFilepath = NULL;
+TCPSocket classSocket;
+UDPSocket configSocket;
+
+static void cleanResources(const int signalNumber);
 
 int main(int argc, char **argv)
 {
@@ -35,8 +39,10 @@ int main(int argc, char **argv)
 	const int portConfig = atoi(argv[2]);
 	usersFilepath        = argv[3];
 
-	TCPSocket classSocket  = createListeningTCPSocket(ipAddress, portClass);
-	UDPSocket configSocket = createBindedUDPSocket(ipAddress, portConfig);
+	classSocket  = createListeningTCPSocket(ipAddress, portClass);
+	configSocket = createBindedUDPSocket(ipAddress, portConfig);
+
+	signal(SIGINT, cleanResources);
 
 	pid_t adminPid;
 	if ((adminPid = fork()) == 0) {
@@ -80,4 +86,14 @@ void usage(const char *const programName)
 	printf("  -h, --help                   Print this usage message\n");
 
 	exit(EXIT_FAILURE);
+}
+
+static void cleanResources(const int signalNumber)
+{
+	signal(signalNumber, SIG_IGN);
+
+	closeTCPSocket(&classSocket);
+	closeUDPSocket(&configSocket);
+
+	signal(signalNumber, cleanResources);
 }

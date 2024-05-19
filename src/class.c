@@ -79,7 +79,7 @@ void processClient(TCPSocket clientTCPSocket)
 		// TODO: Add an abstract api to print this debug information
 		char ipAddressString[INET_ADDRSTRLEN] = {0};
 		printf("[" RED "%s" RESET ":" CYAN "%-6hu" RESET
-		       "] Received " BLUE "%4d" RESET " bytes: %s",
+		       "] Received " BLUE "%4d" RESET " bytes: %s\n",
 		       inet_ntop(AF_INET,
 		                 &clientTCPSocket.address.sin_addr,
 		                 ipAddressString,
@@ -108,6 +108,7 @@ void processClient(TCPSocket clientTCPSocket)
 		/*                     BUFFER_SIZE); */
 
 		writeToTCPSocket(&clientTCPSocket, NULL);
+		fflush(stdout);
 	} while (true);
 }
 
@@ -214,6 +215,29 @@ void addClientLogin(Vector *loggedClients,
 void getFormatedIp(struct sockaddr_in ip, char *buffer)
 {
 	sprintf(buffer, "%s:%d", inet_ntoa(ip.sin_addr), ip.sin_port);
+}
+
+LoggedClient *getLoggedClient(const Vector loggedClients,
+                              const struct sockaddr_in clientIP)
+{
+	for (size_t i = 0; i < loggedClients.size; ++i) {
+		LoggedClient *currentLoggedClient
+		    = (LoggedClient *) vectorGet(&loggedClients, i);
+
+		if (isSameAddress(currentLoggedClient->address, clientIP)) {
+			return currentLoggedClient;
+		}
+	}
+
+	return NULL;
+}
+
+Role getLoggedClientRole(const Vector loggedClients,
+                         const struct sockaddr_in clientIP)
+{
+	LoggedClient *loggedClient = getLoggedClient(loggedClients, clientIP);
+
+	return loggedClient != NULL ? loggedClient->role : ROLE_GUEST;
 }
 
 static void
